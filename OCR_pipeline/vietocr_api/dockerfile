@@ -1,0 +1,26 @@
+# Sử dụng bản slim thay vì bản đầy đủ, giúp giảm dung lượng image gốc từ ~1GB xuống còn ~100MB
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Chỉ cài git (nếu vietocr cần tải trọng số tự động), bỏ qua các thư viện UI vì đã dùng opencv-headless
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+# Cài PyTorch CPU (extra-index để vẫn lấy dependency từ PyPI)
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir \
+      torch torchvision \
+      --extra-index-url https://download.pytorch.org/whl/cpu
+
+# Cài thư viện còn lại
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY weights ./weights
+COPY config_handwriting_final.yml .
+COPY app.py .
+
+CMD ["python", "-u", "app.py"]

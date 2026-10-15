@@ -1,0 +1,25 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Bổ sung libgl1 và libglib2.0-0 để chiều lòng bản opencv-python mà ultralytics lén tải về
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+# Cài PyTorch CPU (extra-index để vẫn lấy dependency từ PyPI)
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir \
+      torch torchvision \
+      --extra-index-url https://download.pytorch.org/whl/cpu
+
+# Cài thư viện còn lại
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "app.py"]

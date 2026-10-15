@@ -1,0 +1,222 @@
+{
+  "doc_id": "mau10trang",
+  "overall": {
+    "cer": 0.3783200908059024,
+    "wer": 0.343937575030012,
+    "word_precision": 0.8252361673414305,
+    "word_recall": 0.734093637454982,
+    "word_f1": 0.7770012706480304
+  },
+  "pages": [
+    {
+      "page": "page_1",
+      "gt_chars": 264,
+      "char_edits": 55,
+      "gt_words": 58,
+      "word_edits": 17,
+      "pred_words": 48,
+      "common_words": 41,
+      "cer": 0.20833333333333334,
+      "wer": 0.29310344827586204,
+      "word_precision": 0.8541666666666666,
+      "word_recall": 0.7068965517241379,
+      "word_f1": 0.7735849056603773
+    },
+    {
+      "page": "page_2",
+      "gt_chars": 612,
+      "char_edits": 110,
+      "gt_words": 138,
+      "word_edits": 36,
+      "pred_words": 118,
+      "common_words": 102,
+      "cer": 0.17973856209150327,
+      "wer": 0.2608695652173913,
+      "word_precision": 0.864406779661017,
+      "word_recall": 0.7391304347826086,
+      "word_f1": 0.796875
+    },
+    {
+      "page": "page_3",
+      "gt_chars": 2313,
+      "char_edits": 1388,
+      "gt_words": 245,
+      "word_edits": 66,
+      "pred_words": 204,
+      "common_words": 183,
+      "cer": 0.6000864677907479,
+      "wer": 0.2693877551020408,
+      "word_precision": 0.8970588235294118,
+      "word_recall": 0.746938775510204,
+      "word_f1": 0.8151447661469934
+    },
+    {
+      "page": "page_4",
+      "gt_chars": 456,
+      "char_edits": 282,
+      "gt_words": 66,
+      "word_edits": 33,
+      "pred_words": 42,
+      "common_words": 34,
+      "cer": 0.618421052631579,
+      "wer": 0.5,
+      "word_precision": 0.8095238095238095,
+      "word_recall": 0.5151515151515151,
+      "word_f1": 0.6296296296296297
+    },
+    {
+      "page": "page_5",
+      "gt_chars": 237,
+      "char_edits": 123,
+      "gt_words": 59,
+      "word_edits": 32,
+      "pred_words": 39,
+      "common_words": 35,
+      "cer": 0.5189873417721519,
+      "wer": 0.5423728813559322,
+      "word_precision": 0.8974358974358975,
+      "word_recall": 0.5932203389830508,
+      "word_f1": 0.7142857142857142
+    },
+    {
+      "page": "page_6",
+      "gt_chars": 0,
+      "char_edits": 0,
+      "gt_words": 0,
+      "word_edits": 0,
+      "pred_words": 0,
+      "common_words": 0,
+      "cer": 0.0,
+      "wer": 0.0,
+      "word_precision": 0.0,
+      "word_recall": 0.0,
+      "word_f1": 0.0
+    },
+    {
+      "page": "page_7",
+      "gt_chars": 489,
+      "char_edits": 123,
+      "gt_words": 117,
+      "word_edits": 41,
+      "pred_words": 89,
+      "common_words": 76,
+      "cer": 0.25153374233128833,
+      "wer": 0.3504273504273504,
+      "word_precision": 0.8539325842696629,
+      "word_recall": 0.6495726495726496,
+      "word_f1": 0.7378640776699029
+    },
+    {
+      "page": "page_8",
+      "gt_chars": 1591,
+      "char_edits": 777,
+      "gt_words": 356,
+      "word_edits": 192,
+      "pred_words": 405,
+      "common_words": 268,
+      "cer": 0.4883720930232558,
+      "wer": 0.5393258426966292,
+      "word_precision": 0.6617283950617284,
+      "word_recall": 0.7528089887640449,
+      "word_f1": 0.7043363994743758
+    },
+    {
+      "page": "page_9",
+      "gt_chars": 1309,
+      "char_edits": 127,
+      "gt_words": 289,
+      "word_edits": 50,
+      "pred_words": 268,
+      "common_words": 244,
+      "cer": 0.09702062643239114,
+      "wer": 0.17301038062283736,
+      "word_precision": 0.9104477611940298,
+      "word_recall": 0.8442906574394463,
+      "word_f1": 0.8761220825852784
+    },
+    {
+      "page": "page_10",
+      "gt_chars": 1539,
+      "char_edits": 348,
+      "gt_words": 338,
+      "word_edits": 106,
+      "pred_words": 269,
+      "common_words": 240,
+      "cer": 0.22612085769980506,
+      "wer": 0.3136094674556213,
+      "word_precision": 0.8921933085501859,
+      "word_recall": 0.7100591715976331,
+      "word_f1": 0.7907742998352554
+    }
+  ],
+  "timing": {
+    "total_seconds": 361.3,
+    "pages": 10,
+    "seconds_per_page": 36.1
+  },
+  "resources": {
+    "preprocess": {
+      "cpu_avg": 5.9,
+      "cpu_max": 277.4,
+      "mem_avg_mib": 314.5,
+      "mem_max_mib": 356.7,
+      "samples": 70
+    },
+    "layout-worker": {
+      "cpu_avg": 56.8,
+      "cpu_max": 221.0,
+      "mem_avg_mib": 514.2,
+      "mem_max_mib": 612.9,
+      "samples": 70
+    },
+    "paddleocr-worker": {
+      "cpu_avg": 14.4,
+      "cpu_max": 129.7,
+      "mem_avg_mib": 934.2,
+      "mem_max_mib": 971.0,
+      "samples": 70
+    },
+    "vietocr-worker": {
+      "cpu_avg": 189.3,
+      "cpu_max": 241.8,
+      "mem_avg_mib": 593.3,
+      "mem_max_mib": 612.0,
+      "samples": 70
+    },
+    "reconstruct-worker": {
+      "cpu_avg": 2.9,
+      "cpu_max": 9.2,
+      "mem_avg_mib": 47.3,
+      "mem_max_mib": 48.7,
+      "samples": 70
+    },
+    "merge-worker": {
+      "cpu_avg": 4.8,
+      "cpu_max": 11.1,
+      "mem_avg_mib": 49.4,
+      "mem_max_mib": 50.7,
+      "samples": 70
+    },
+    "nifi": {
+      "cpu_avg": 44.0,
+      "cpu_max": 150.3,
+      "mem_avg_mib": 1279.6,
+      "mem_max_mib": 1295.4,
+      "samples": 70
+    },
+    "kafka": {
+      "cpu_avg": 9.5,
+      "cpu_max": 66.6,
+      "mem_avg_mib": 928.9,
+      "mem_max_mib": 942.2,
+      "samples": 70
+    },
+    "minio": {
+      "cpu_avg": 4.2,
+      "cpu_max": 41.8,
+      "mem_avg_mib": 281.8,
+      "mem_max_mib": 299.4,
+      "samples": 70
+    }
+  }
+}

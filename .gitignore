@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Mật khẩu thật (mẫu ở OCR_pipeline/.env.example)
+.env
+
+# Dữ liệu runtime (MinIO, Kafka, model PaddleOCR tải về)
+OCR_pipeline/data/
+
+# Weights model: file lớn (VietOCR ~145 MB vượt giới hạn 100 MB của GitHub).
+# Tải từ Google Drive, xem README.txt
+*.pt
+*.pth
+
+# Log / checkpoint khi train
+*.log
+checkpoint/
+
+# Tài liệu tham khảo của sinh viên khác, không đưa lên repo
+docs/20225526_TrinhHuynhSon.pdf
+
+# Hệ điều hành / editor
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

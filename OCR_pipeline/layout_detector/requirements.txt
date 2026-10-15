@@ -1,0 +1,6 @@
+ultralytics==8.3.0
+doclayout-yolo
+huggingface-hub
+numpy<2.0.0
+boto3
+kafka-python-ng

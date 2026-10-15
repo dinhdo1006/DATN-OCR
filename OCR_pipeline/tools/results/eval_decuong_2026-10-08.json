@@ -1,0 +1,138 @@
+{
+  "doc_id": "decuong_v2",
+  "overall": {
+    "cer": 0.3480651731160896,
+    "wer": 0.4027640671273445,
+    "word_precision": 0.9097525473071325,
+    "word_recall": 0.6169792694965449,
+    "word_f1": 0.7352941176470589
+  },
+  "pages": [
+    {
+      "page": "page_1",
+      "gt_chars": 1158,
+      "char_edits": 306,
+      "gt_words": 238,
+      "word_edits": 74,
+      "pred_words": 183,
+      "common_words": 164,
+      "cer": 0.26424870466321243,
+      "wer": 0.31092436974789917,
+      "word_precision": 0.8961748633879781,
+      "word_recall": 0.6890756302521008,
+      "word_f1": 0.7790973871733967
+    },
+    {
+      "page": "page_2",
+      "gt_chars": 2157,
+      "char_edits": 63,
+      "gt_words": 452,
+      "word_edits": 51,
+      "pred_words": 441,
+      "common_words": 401,
+      "cer": 0.02920723226703755,
+      "wer": 0.11283185840707964,
+      "word_precision": 0.909297052154195,
+      "word_recall": 0.8871681415929203,
+      "word_f1": 0.8980963045912654
+    },
+    {
+      "page": "page_3",
+      "gt_chars": 1005,
+      "char_edits": 812,
+      "gt_words": 198,
+      "word_edits": 172,
+      "pred_words": 49,
+      "common_words": 46,
+      "cer": 0.8079601990049752,
+      "wer": 0.8686868686868687,
+      "word_precision": 0.9387755102040817,
+      "word_recall": 0.23232323232323232,
+      "word_f1": 0.3724696356275303
+    },
+    {
+      "page": "page_4",
+      "gt_chars": 590,
+      "char_edits": 528,
+      "gt_words": 125,
+      "word_edits": 111,
+      "pred_words": 14,
+      "common_words": 14,
+      "cer": 0.8949152542372881,
+      "wer": 0.888,
+      "word_precision": 1.0,
+      "word_recall": 0.112,
+      "word_f1": 0.2014388489208633
+    }
+  ],
+  "timing": {
+    "total_seconds": 184.7,
+    "pages": 4,
+    "seconds_per_page": 46.2
+  },
+  "resources": {
+    "preprocess": {
+      "cpu_avg": 4.3,
+      "cpu_max": 127.0,
+      "mem_avg_mib": 336.4,
+      "mem_max_mib": 342.0,
+      "samples": 36
+    },
+    "layout-worker": {
+      "cpu_avg": 43.4,
+      "cpu_max": 207.9,
+      "mem_avg_mib": 554.6,
+      "mem_max_mib": 661.9,
+      "samples": 36
+    },
+    "paddleocr-worker": {
+      "cpu_avg": 13.8,
+      "cpu_max": 136.6,
+      "mem_avg_mib": 864.7,
+      "mem_max_mib": 908.4,
+      "samples": 36
+    },
+    "vietocr-worker": {
+      "cpu_avg": 176.6,
+      "cpu_max": 214.0,
+      "mem_avg_mib": 501.3,
+      "mem_max_mib": 509.0,
+      "samples": 36
+    },
+    "reconstruct-worker": {
+      "cpu_avg": 2.9,
+      "cpu_max": 7.7,
+      "mem_avg_mib": 45.9,
+      "mem_max_mib": 47.2,
+      "samples": 36
+    },
+    "merge-worker": {
+      "cpu_avg": 4.2,
+      "cpu_max": 15.8,
+      "mem_avg_mib": 46.8,
+      "mem_max_mib": 48.2,
+      "samples": 36
+    },
+    "nifi": {
+      "cpu_avg": 39.8,
+      "cpu_max": 124.0,
+      "mem_avg_mib": 1347.0,
+      "mem_max_mib": 1352.7,
+      "samples": 36
+    },
+    "kafka": {
+      "cpu_avg": 10.3,
+      "cpu_max": 22.1,
+      "mem_avg_mib": 738.3,
+      "mem_max_mib": 755.8,
+      "samples": 36
+    },
+    "minio": {
+      "cpu_avg": 7.1,
+      "cpu_max": 48.2,
+      "mem_avg_mib": 203.9,
+      "mem_max_mib": 220.1,
+      "samples": 36
+    }
+  }
+}
