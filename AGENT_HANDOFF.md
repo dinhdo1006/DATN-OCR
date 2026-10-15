@@ -38,6 +38,7 @@ Phần **chạy thật** nằm trong `Thesis/OCR_pipeline/`.
 | Web UI upload/xem kết quả | ✅ Xong | `OCR_pipeline/web_ui/`, http://localhost:8501 |
 | MinIO → Docker volume `ocr_minio_data` | ✅ Xong (2026-10-03) | bind mount Windows gây lỗi I/O, mất dữ liệu |
 | **E2E test** (upload PDF → có output) | ✅ Pass (2026-10-03) | PDF 3 trang ~2m45s, đủ box, merge `complete`, không timeout |
+| Git + tách mật khẩu ra `.env` | ✅ Xong (2026-10-15) | remote `github.com/dinhdo1006/DATN-OCR` (public); weights, `data/`, `.env` không commit |
 | UI demo / hoàn thiện báo cáo | ❓ Ngoài setup kỹ thuật | File trong `docs/` |
 
 **Một câu:** Pipeline chạy thông end-to-end qua Web UI. Việc tiếp theo là nâng chất lượng (box trùng lặp, độ chính xác dấu tiếng Việt).
