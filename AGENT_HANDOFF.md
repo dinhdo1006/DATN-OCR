@@ -117,7 +117,8 @@ NiFi S3 đã set: Endpoint `http://minio:9000`, bucket `data-lake`, ListS3 prefi
 
 ## 7. Fix kỹ thuật đã áp dụng (tránh làm lại)
 
-- `minio/minio` Docker Hub lỗi → `quay.io/minio/minio:latest` trong compose  
+- MinIO đã gỡ image khỏi Docker Hub và quay.io (10/2026: `denied` / 401) → dùng `pgsty/minio:RELEASE.2026-08-04T00-00-00Z` (bản build cộng đồng, giữ đủ Console). Máy mới: tạo volume `docker volume create ocr_minio_data` và bucket `data-lake` (`mc mb local/data-lake` trong container minio)  
+- NiFi mới tạo: chạy `tools/setup_nifi.ps1` (upload template, điền khóa từ `.env`, prefix `raw/`, Start)  
 - PyTorch: dùng `--extra-index-url` (không chỉ `--index-url`)  
 - Ghim `opencv-python-headless==4.8.1.78` (tránh lỗi hash)  
 - Bỏ attribute `version` obsolete trong compose  

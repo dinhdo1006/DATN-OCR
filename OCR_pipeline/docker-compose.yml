@@ -26,7 +26,9 @@ services:
   # MINIO
   # =========================
   minio:
-    image: quay.io/minio/minio:latest
+    # MinIO đã ngừng phát hành image trên Docker Hub và quay.io (10/2026 trả 401/denied);
+    # pgsty/minio là bản build cộng đồng của cùng mã nguồn MinIO, giữ đủ MinIO Console
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
     container_name: minio
     restart: always
     command: server /data --console-address ":9001"
