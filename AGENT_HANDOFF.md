@@ -2,7 +2,7 @@
 
 > **Đọc file này trước** khi agent / người mới tiếp tục dự án.  
 > Hướng dẫn chạy thường ngày nằm ở `README.txt`.  
-> **Cập nhật lần cuối:** 2026-10-08 chiều (OCR chữ trong bảng → bảng Markdown, TC01–TC11 đạt, báo cáo + slide đã cập nhật số liệu thật).  
+> **Cập nhật lần cuối:** 2026-10-15 tối (dựng lại toàn bộ stack trên máy mới, so sánh trọng số VietOCR → giữ `transformerocr_final.pth`, script `tools/setup_nifi.ps1`, báo cáo thêm Bảng 3-6).  
 > **Workspace:** `d:\Đồ án công nghệ phần mềm\Thesis`
 
 ---
@@ -39,6 +39,8 @@ Phần **chạy thật** nằm trong `Thesis/OCR_pipeline/`.
 | MinIO → Docker volume `ocr_minio_data` | ✅ Xong (2026-10-03) | bind mount Windows gây lỗi I/O, mất dữ liệu |
 | **E2E test** (upload PDF → có output) | ✅ Pass (2026-10-03) | PDF 3 trang ~2m45s, đủ box, merge `complete`, không timeout |
 | Git + tách mật khẩu ra `.env` | ✅ Xong (2026-10-15) | remote `github.com/dinhdo1006/DATN-OCR` (public); weights, `data/`, `.env` không commit |
+| Dựng lại stack trên máy mới (i7-9750H) | ✅ Xong (2026-10-15) | E2E qua NiFi: đề cương CER 5,44%, F1 88,21%, 54,4 s/trang – khớp báo cáo |
+| So sánh trọng số VietOCR | ✅ Xong (2026-10-15) | giữ `transformerocr_final.pth` (gốc `vgg_transformer` kém hơn); xem mục 7b5 |
 | UI demo / hoàn thiện báo cáo | ❓ Ngoài setup kỹ thuật | File trong `docs/` |
 
 **Một câu:** Pipeline chạy thông end-to-end qua Web UI. Việc tiếp theo là nâng chất lượng (box trùng lặp, độ chính xác dấu tiếng Việt).
@@ -169,6 +171,15 @@ Recall thấp ở trang 3–4 do **bảng chỉ cắt thành ảnh, chưa OCR ch
 - Kết quả đo (tools/results/): đề cương 4 trang có bảng **CER 5,44%, F1 từ 88,21%**, 54,9 s/trang; mẫu ĐATN 10 trang F1 77,7%, **36,1 s/trang** (đáp án có header/footer + chấm dẫn mục lục). TC01–TC11 đạt: `tools/results/kiem_thu_2026-10-08.md`.
 - Báo cáo `..\BaoCao_DATN_NguyenDinhDo.docx` (+ .pdf) và slide `..\Slide_DATN_NguyenDinhDo.pptx` đã cập nhật; bản 06/10 giữ lại với hậu tố "(ban 06-10)". Còn để sinh viên điền: 3 ảnh chụp (docker compose ps, canvas NiFi, MinIO Console) và số "ĐỢT ……" ở tiêu đề trang.
 - Tài liệu cũ `Slide_MathModelling` trên UI kẹt "Đang nhận dạng 27/27" là dữ liệu chạy trước khi sửa lỗi (kết quả từng ghi vào `final/raw/`), không phải lỗi mới.
+
+## 7b5. Session 2026-10-15 (máy mới `C:\Users\hi`, Docker trống)
+
+- **So sánh trọng số** (`tools/results/so_sanh_model_vietocr_2026-10-15.md`): `transformerocr_final.pth` tốt hơn `vgg_transformer` gốc trên cả hai tài liệu (đề cương CER 5,44% vs 11,18%; mẫu 10 trang 37,87% vs 38,80%). Gốc hay sinh từ thừa cuối dòng ("dựa trên thuật thức"). → Giữ nguyên. Báo cáo đã thêm Bảng 3-6.
+- **Tái lập số đo**: dùng đúng tài liệu cũ (đề cương bản 4 trang = `docs/` cũ trong git `ce9c783`; mẫu ĐATN trang 9–18), đáp án `pdftotext` khớp từng ký tự với lần 08/10. Pipeline tất định: CER 5,44% trùng từng chữ số.
+- **NiFi template không lưu auto-terminate** → import lại thì 8/9 processor INVALID. `tools/setup_nifi.ps1` tự xử lý (auto-terminate mọi nhánh không nối, điền khóa từ `.env`, prefix `raw/`, Start). Lần đầu ListS3 liệt kê **mọi** PDF có sẵn trong `raw/` và xử lý lại.
+- **NiFi nuốt lỗi im lặng**: nhánh failure/No Retry tự hủy → PDF lỗi kẹt "queued" trên UI. Đề xuất (chưa làm): InvokeHTTP Retry vòng lại, Failure ghi đánh dấu `errors/` để UI hiện "Lỗi".
+- Thuộc tính thừa trong UpdateAttribute thứ 2 (`${invokehttp.response.header.X-…}`, luôn rỗng) và `path_chuan` luôn = `raw` – vô hại, worker/UI đã thích nghi.
+- Build: PyTorch không ghim → bản 2.14.1, chạy tốt với vietocr 0.3.12. Mạng chậm/chập chờn: build từng image một, có retry.
 
 ## 7c. Lưu ý vận hành
 
