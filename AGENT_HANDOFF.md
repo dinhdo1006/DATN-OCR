@@ -2,7 +2,7 @@
 
 > **Đọc file này trước** khi agent / người mới tiếp tục dự án.  
 > Hướng dẫn chạy thường ngày nằm ở `README.txt`.  
-> **Cập nhật lần cuối:** 2026-10-16 (xử lý lỗi trong NiFi: retry + `errors/` + Web UI "Lỗi", TC12–TC13; trước đó 15/10: dựng lại stack trên máy mới, so sánh trọng số VietOCR, `tools/setup_nifi.ps1`).  
+> **Cập nhật lần cuối:** 2026-10-16 trưa (báo cáo + slide hoàn thiện, bộ câu hỏi bảo vệ – mục 7b7; xử lý lỗi NiFi – 7b6; 15/10: dựng lại stack trên máy mới, so sánh trọng số VietOCR).  
 > **Workspace:** `d:\Đồ án công nghệ phần mềm\Thesis`
 
 ---
@@ -42,6 +42,7 @@ Phần **chạy thật** nằm trong `Thesis/OCR_pipeline/`.
 | Dựng lại stack trên máy mới (i7-9750H) | ✅ Xong (2026-10-15) | E2E qua NiFi: đề cương CER 5,44%, F1 88,21%, 54,4 s/trang – khớp báo cáo |
 | So sánh trọng số VietOCR | ✅ Xong (2026-10-15) | giữ `transformerocr_final.pth` (gốc `vgg_transformer` kém hơn); xem mục 7b5 |
 | Xử lý lỗi NiFi (retry + `errors/` + UI "Lỗi") | ✅ Xong (2026-10-16) | template 11 processor; TC12, TC13 đạt; xem mục 7b6 |
+| Báo cáo + slide hoàn thiện | ✅ Xong (2026-10-16) | xem mục 7b7; còn sinh viên điền "ĐỢT ……", kiểm tra TS/ThS của GVHD |
 | UI demo / hoàn thiện báo cáo | ❓ Ngoài setup kỹ thuật | File trong `docs/` |
 
 **Một câu:** Pipeline chạy thông end-to-end qua Web UI. Việc tiếp theo là nâng chất lượng (box trùng lặp, độ chính xác dấu tiếng Việt).
@@ -195,6 +196,15 @@ Nay (`template_nifi.xml` 11 processor / 15 connection, đã export lại từ Ni
 Kiểm thử (`tools/results/kiem_thu_2026-10-16.md`): TC12 PDF hỏng → "Lỗi" sau ~3 s; TC13 tắt preprocess 40 s lúc tải lên → NiFi thử lại, tài liệu vẫn xong 4/4. Import template mới vào NiFi trắng → 11/11 VALID, giữ cấu hình retry.
 
 Lưu ý: tạo NiFi mới thì ListS3 xử lý lại **mọi** PDF trong `raw/` (lần 16/10: 8 PDF ≈ 36 trang, ~25 phút). Trong lúc đó UI có thể hiện `partial` và merge ghép lặp lại – là trạng thái trung gian, tự về `done` khi hàng đợi hết. Kiểm tra hàng đợi: `docker exec kafka sh -c '/opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --all-groups'` (cột LAG).
+
+## 7b7. Báo cáo và slide (2026-10-16)
+
+- **Tên đề tài giữ nguyên** (sinh viên không được đổi). Chỉ dùng `..\BaoCao_DATN_NguyenDinhDo.docx/.pdf` và `..\Slide_DATN_NguyenDinhDo.pptx`; bản "(ten moi)" đã bỏ vào Thùng rác.
+- Báo cáo (77 trang): Bảng 3-6 so sánh trọng số; nhánh lỗi NiFi + lỗi (vii) + TC12–TC13; 3 ảnh chụp (Hình 3-1, 3-2, 3-5); mục "Đóng góp" thêm 3 gạch (bảng Markdown, nhánh lỗi NiFi, công cụ đánh giá + so sánh trọng số); trang bìa: "Hà Nội, 2026" đã về trang 1 (trang 2 để trắng, các trang sau giữ vị trí).
+- Slide (24 slide): số liệu khớp báo cáo (11 lỗi logic, 13/13 ca, CER 5,44% vs 11,18%); thêm slide 17 "Xử lý lỗi trong luồng NiFi" (ảnh canvas) và slide 19 "So sánh trọng số VietOCR".
+- Bộ câu hỏi bảo vệ (Claude Docs): https://claude.ai/code/artifact/35b91041-4db2-4c30-aaba-8880c621df6e
+- Còn sinh viên tự làm: điền "ĐỢT ……" ở tiêu đề trang; thống nhất học hàm GVHD (báo cáo/slide ghi "TS.", đề cương ghi "ThS.").
+- File mẫu `Mau trinh bay DATN CNPM - 21 07 2025.docx` không còn trong thư mục cha (không do agent xóa).
 
 ## 7c. Lưu ý vận hành
 
