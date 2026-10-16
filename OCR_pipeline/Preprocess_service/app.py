@@ -3,6 +3,7 @@ from fastapi.responses import FileResponse
 from fastapi.concurrency import run_in_threadpool
 import os, shutil, zipfile, uuid
 from pathlib import Path
+from pdf2image.exceptions import PDFPageCountError, PDFSyntaxError
 from preprocess import process_scan_pdf
 
 app = FastAPI()
@@ -29,7 +30,17 @@ async def process(file: UploadFile = File(...)):
 
     try:
         images = await run_in_threadpool(process_scan_pdf, pdf_path, OUTPUT_DIR)
+    except (PDFPageCountError, PDFSyntaxError) as e:
+        # PDF hỏng / có mật khẩu: lỗi của dữ liệu đầu vào (4xx) để NiFi không thử lại vô ích
+        reason = (str(e).strip().splitlines() or [""])[0][:150]
+        raise HTTPException(status_code=422, detail=f"Không đọc được PDF (tệp hỏng hoặc có mật khẩu): {reason}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
+    if not images:
+        raise HTTPException(status_code=422, detail="PDF không có trang nào")
+
+    try:
         total_pages = len(images)  # 🔥 QUAN TRỌNG
 
         zip_path = os.path.join(OUTPUT_DIR, f"{unique_name}.zip")

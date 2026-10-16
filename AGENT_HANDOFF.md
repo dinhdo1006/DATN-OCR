@@ -2,7 +2,7 @@
 
 > **Đọc file này trước** khi agent / người mới tiếp tục dự án.  
 > Hướng dẫn chạy thường ngày nằm ở `README.txt`.  
-> **Cập nhật lần cuối:** 2026-10-15 tối (dựng lại toàn bộ stack trên máy mới, so sánh trọng số VietOCR → giữ `transformerocr_final.pth`, script `tools/setup_nifi.ps1`, báo cáo thêm Bảng 3-6).  
+> **Cập nhật lần cuối:** 2026-10-16 (xử lý lỗi trong NiFi: retry + `errors/` + Web UI "Lỗi", TC12–TC13; trước đó 15/10: dựng lại stack trên máy mới, so sánh trọng số VietOCR, `tools/setup_nifi.ps1`).  
 > **Workspace:** `d:\Đồ án công nghệ phần mềm\Thesis`
 
 ---
@@ -41,6 +41,7 @@ Phần **chạy thật** nằm trong `Thesis/OCR_pipeline/`.
 | Git + tách mật khẩu ra `.env` | ✅ Xong (2026-10-15) | remote `github.com/dinhdo1006/DATN-OCR` (public); weights, `data/`, `.env` không commit |
 | Dựng lại stack trên máy mới (i7-9750H) | ✅ Xong (2026-10-15) | E2E qua NiFi: đề cương CER 5,44%, F1 88,21%, 54,4 s/trang – khớp báo cáo |
 | So sánh trọng số VietOCR | ✅ Xong (2026-10-15) | giữ `transformerocr_final.pth` (gốc `vgg_transformer` kém hơn); xem mục 7b5 |
+| Xử lý lỗi NiFi (retry + `errors/` + UI "Lỗi") | ✅ Xong (2026-10-16) | template 11 processor; TC12, TC13 đạt; xem mục 7b6 |
 | UI demo / hoàn thiện báo cáo | ❓ Ngoài setup kỹ thuật | File trong `docs/` |
 
 **Một câu:** Pipeline chạy thông end-to-end qua Web UI. Việc tiếp theo là nâng chất lượng (box trùng lặp, độ chính xác dấu tiếng Việt).
@@ -176,10 +177,22 @@ Recall thấp ở trang 3–4 do **bảng chỉ cắt thành ảnh, chưa OCR ch
 
 - **So sánh trọng số** (`tools/results/so_sanh_model_vietocr_2026-10-15.md`): `transformerocr_final.pth` tốt hơn `vgg_transformer` gốc trên cả hai tài liệu (đề cương CER 5,44% vs 11,18%; mẫu 10 trang 37,87% vs 38,80%). Gốc hay sinh từ thừa cuối dòng ("dựa trên thuật thức"). → Giữ nguyên. Báo cáo đã thêm Bảng 3-6.
 - **Tái lập số đo**: dùng đúng tài liệu cũ (đề cương bản 4 trang = `docs/` cũ trong git `ce9c783`; mẫu ĐATN trang 9–18), đáp án `pdftotext` khớp từng ký tự với lần 08/10. Pipeline tất định: CER 5,44% trùng từng chữ số.
-- **NiFi template không lưu auto-terminate** → import lại thì 8/9 processor INVALID. `tools/setup_nifi.ps1` tự xử lý (auto-terminate mọi nhánh không nối, điền khóa từ `.env`, prefix `raw/`, Start). Lần đầu ListS3 liệt kê **mọi** PDF có sẵn trong `raw/` và xử lý lại.
-- **NiFi nuốt lỗi im lặng**: nhánh failure/No Retry tự hủy → PDF lỗi kẹt "queued" trên UI. Đề xuất (chưa làm): InvokeHTTP Retry vòng lại, Failure ghi đánh dấu `errors/` để UI hiện "Lỗi".
+- `tools/setup_nifi.ps1`: upload template, điền khóa từ `.env` (template không chứa khóa bí mật), prefix `raw/`, Start. Lần đầu ListS3 liệt kê **mọi** PDF có sẵn trong `raw/` và xử lý lại. (Đính chính: template **có** lưu auto-terminate – nằm ở `<relationships><autoTerminate>`, không phải `config.autoTerminatedRelationships`; nhận định "template thiếu auto-terminate" trong commit `b2e4ccb` là sai.)
+- **NiFi nuốt lỗi im lặng** (template cũ tự hủy mọi nhánh lỗi) → đã sửa ngày 16/10, xem 7b6.
 - Thuộc tính thừa trong UpdateAttribute thứ 2 (`${invokehttp.response.header.X-…}`, luôn rỗng) và `path_chuan` luôn = `raw` – vô hại, worker/UI đã thích nghi.
 - Build: PyTorch không ghim → bản 2.14.1, chạy tốt với vietocr 0.3.12. Mạng chậm/chập chờn: build từng image một, có retry.
+
+## 7b6. Xử lý lỗi trong NiFi (2026-10-16)
+
+Trước: PDF hỏng (qua được kiểm tra `%PDF` của Web UI) → preprocess trả 500 → nhánh Retry bị tự hủy → tài liệu kẹt "Đang chờ NiFi" mãi.
+
+Nay (`template_nifi.xml` 11 processor / 15 connection, đã export lại từ NiFi):
+- **Preprocess** trả **422** khi pdf2image không đọc được PDF (hỏng / có mật khẩu) hoặc PDF 0 trang → NiFi xếp vào `No Retry`, không thử lại vô ích.
+- **Thử lại** (cơ chế retry của NiFi ≥ 1.16, lưu trong template): InvokeHTTP `Retry`+`Failure`, FetchS3Object / PutS3Object / PublishKafka `failure` – 3 lần, backoff phạt FlowFile (30 s → tối đa 2 phút).
+- Hết lượt thử hoặc lỗi dữ liệu → **ReplaceText (bản ghi lỗi)** dựng JSON (`document_id`, `status_code`, `response` = body lỗi, `exception`, `failed_at`) → **PutS3Object (errors/)** ghi `errors/<ten_pdf>.json`.
+- **Web UI**: có `errors/<id>.json` (và chưa có `final/`) → trạng thái `error`, nhãn "Lỗi" kèm lý do (lấy `detail` trong body lỗi).
+
+Kiểm thử (`tools/results/kiem_thu_2026-10-16.md`): TC12 PDF hỏng → "Lỗi" sau ~3 s; TC13 tắt preprocess 40 s lúc tải lên → NiFi thử lại, tài liệu vẫn xong 4/4. Import template mới vào NiFi trắng → 11/11 VALID, giữ cấu hình retry.
 
 ## 7c. Lưu ý vận hành
 

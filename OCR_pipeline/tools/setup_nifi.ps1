@@ -1,5 +1,7 @@
 ﻿# Dựng lại luồng NiFi qua REST API: upload template_nifi.xml, tạo flow trên canvas,
 # điền khóa MinIO (lấy từ .env) cho các processor S3, đặt tiền tố ListS3 = raw/, rồi Start.
+# Template không chứa khóa bí mật (NiFi không xuất thuộc tính nhạy cảm) nên bước điền khóa là bắt buộc.
+# Lưu ý: NiFi mới có ListS3 chưa có trạng thái nên sẽ xử lý lại mọi PDF đang có trong raw/.
 #
 # Dùng (trong thư mục OCR_pipeline, sau khi `docker compose up -d` và NiFi đã chạy):
 #     powershell -ExecutionPolicy Bypass -File tools\setup_nifi.ps1
@@ -63,8 +65,8 @@ Invoke-NiFi POST "/process-groups/$rootId/template-instance" @{ templateId = $te
 "Template instantiated"
 
 # ---- Cấu hình processor: khóa S3, prefix, nhánh không nối ----
-# Template không lưu auto-terminate: nhánh nào không nối sang processor khác (failure, Retry, Original...)
-# phải được tự hủy, nếu không processor ở trạng thái INVALID và không Start được.
+# Template đã lưu auto-terminate (trong <relationships><autoTerminate>); bước dưới chỉ để chắc chắn
+# mọi nhánh không nối đều được tự hủy, phòng khi template bị sửa tay thiếu (processor sẽ INVALID).
 $connected = @{}
 foreach ($c in (Invoke-NiFi GET "/process-groups/$rootId/connections" -Token $token).connections) {
     foreach ($rel in $c.component.selectedRelationships) { $connected["$($c.component.source.id)|$rel"] = $true }

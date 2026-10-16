@@ -62,6 +62,7 @@ def doc_status(doc_id: str, uploaded_at=None) -> dict:
     pic/raw/<id>/page_N.png  -> số trang đã preprocess (tổng số trang)
     text/raw/<id>/page_N.txt -> số trang đã OCR xong
     final/<id>/<id>.txt      -> tài liệu đã merge
+    errors/<id>.json         -> NiFi không xử lý được tài liệu (PDF hỏng, preprocess lỗi...)
     """
     pages_total = len(list_keys(f"pic/raw/{doc_id}/"))
     pages_done = len([o for o in list_keys(f"text/raw/{doc_id}/") if o["Key"].endswith(".txt")])
@@ -72,11 +73,26 @@ def doc_status(doc_id: str, uploaded_at=None) -> dict:
             merge_status = json.loads(read_text(f"final/{doc_id}/{doc_id}.json")).get("status")
         except Exception:
             pass
+    error = None
+    if not final and exists(f"errors/{doc_id}.json"):
+        try:
+            error = json.loads(read_text(f"errors/{doc_id}.json"))
+        except Exception:
+            error = {"message": "Không đọc được bản ghi lỗi"}
+        # NiFi ghi nguyên body lỗi của preprocess ({"detail": ...}) vào trường response
+        try:
+            detail = json.loads(error.get("response") or "{}").get("detail")
+        except Exception:
+            detail = None
+        error["message"] = (error.get("message") or detail or error.get("exception")
+                            or error.get("status_message") or "Không rõ nguyên nhân")
 
     if final and merge_status == "partial":
         status = "partial"  # đã ghép nhưng còn trang thiếu box, sẽ tự ghép lại khi box đến
     elif final:
         status = "done"
+    elif error:
+        status = "error"
     elif pages_done > 0:
         status = "ocr"
     elif pages_total > 0:
@@ -90,6 +106,7 @@ def doc_status(doc_id: str, uploaded_at=None) -> dict:
         "pages_total": pages_total,
         "pages_done": pages_done,
         "final": final,
+        "error": error,
         "uploaded_at": uploaded_at,
     }
 

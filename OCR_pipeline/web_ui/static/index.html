@@ -28,6 +28,7 @@
   .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line); }
   .badge.done { color:var(--ok); border-color:var(--ok); }
   .badge.run  { color:var(--warn); border-color:var(--warn); }
+  .badge.error { color:#dc2626; border-color:#dc2626; }
   .bar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; min-width:80px; }
   .bar > i { display:block; height:100%; background:var(--accent); }
   .bar.done > i { background:var(--ok); }
@@ -69,7 +70,8 @@
 
 <script>
 const $ = s => document.querySelector(s);
-const LABEL = { queued: "Đang chờ NiFi", layout: "Đang phân tích bố cục", ocr: "Đang nhận dạng", partial: "Hoàn tất một phần", done: "Hoàn tất" };
+const LABEL = { queued: "Đang chờ NiFi", layout: "Đang phân tích bố cục", ocr: "Đang nhận dạng", partial: "Hoàn tất một phần", done: "Hoàn tất", error: "Lỗi" };
+const BADGE = { done: 'done', error: 'error' };
 // Mở thẳng một tài liệu qua địa chỉ #doc=<mã> (tiện khi demo)
 let selected = decodeURIComponent((location.hash.match(/doc=([^&]+)/) || [])[1] || '') || null;
 
@@ -101,7 +103,7 @@ async function loadList() {
         const prog = d.pages_total ? `${d.pages_done}/${d.pages_total} trang` : '—';
         return `<tr class="doc ${d.id === selected ? 'sel' : ''}" data-id="${esc(d.id)}">
           <td>${esc(d.id)}</td>
-          <td><span class="badge ${d.status === 'done' ? 'done' : 'run'}">${LABEL[d.status]}</span></td>
+          <td><span class="badge ${BADGE[d.status] || 'run'}">${LABEL[d.status]}</span></td>
           <td><div class="bar ${d.status === 'done' ? 'done' : ''}"><i style="width:${pct}%"></i></div><small>${prog}</small></td></tr>`;
       }).join('') + '</tbody></table>';
     document.querySelectorAll('tr.doc').forEach(tr => tr.onclick = () => { selected = tr.dataset.id; history.replaceState(null, '', '#doc=' + encodeURIComponent(selected)); loadList(); loadDoc(); });
@@ -115,8 +117,10 @@ async function loadDoc() {
   const d = await r.json();
   $('#title').textContent = 'Kết quả: ' + d.id + (d.final ? '' : ' (tạm thời)');
   const out = $('#out');
-  out.className = '';
-  out.textContent = d.text || '(Chưa có trang nào được nhận dạng xong)';
+  out.className = d.error ? 'err' : '';
+  out.textContent = d.error
+    ? `Không xử lý được tài liệu.\nLý do: ${d.error.message || 'không rõ'}` + (d.error.status_code ? ` (HTTP ${d.error.status_code})` : '')
+    : (d.text || '(Chưa có trang nào được nhận dạng xong)');
   const dl = $('#dl');
   dl.style.display = d.final ? '' : 'none';
   dl.href = '/api/documents/' + encodeURIComponent(d.id) + '/download';

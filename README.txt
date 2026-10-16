@@ -59,6 +59,18 @@ docker compose up -d --build
 
 ## Cấu hình NiFi
 
+Cách nhanh (khi NiFi mới tạo, canvas trống) – script tự làm các bước bên dưới:
+
+```powershell
+cd OCR_pipeline
+powershell -ExecutionPolicy Bypass -File tools\setup_nifi.ps1
+```
+
+Luồng gồm 11 processor: 9 processor xử lý chính và nhánh lỗi (ReplaceText + PutS3Object ghi
+`errors/<tên>.json`, Web UI hiện "Lỗi"); lỗi tạm thời được NiFi thử lại 3 lần.
+
+Cách làm tay:
+
 1. Mở https://localhost:8443/nifi/
 2. Đăng nhập: NIFI_USERNAME / NIFI_PASSWORD trong `.env`
 3. Upload template: `OCR_pipeline/template_nifi.xml`
