@@ -194,6 +194,8 @@ Nay (`template_nifi.xml` 11 processor / 15 connection, đã export lại từ Ni
 
 Kiểm thử (`tools/results/kiem_thu_2026-10-16.md`): TC12 PDF hỏng → "Lỗi" sau ~3 s; TC13 tắt preprocess 40 s lúc tải lên → NiFi thử lại, tài liệu vẫn xong 4/4. Import template mới vào NiFi trắng → 11/11 VALID, giữ cấu hình retry.
 
+Lưu ý: tạo NiFi mới thì ListS3 xử lý lại **mọi** PDF trong `raw/` (lần 16/10: 8 PDF ≈ 36 trang, ~25 phút). Trong lúc đó UI có thể hiện `partial` và merge ghép lặp lại – là trạng thái trung gian, tự về `done` khi hàng đợi hết. Kiểm tra hàng đợi: `docker exec kafka sh -c '/opt/kafka/bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --all-groups'` (cột LAG).
+
 ## 7c. Lưu ý vận hành
 
 - Docker Desktop dùng chung ~8 GB RAM với CVAT/nuclio. Khi quá tải engine có thể treo (`docker stop` không phản hồi); cách gỡ: restart máy, rồi dừng CVAT trước khi chạy OCR nặng.
