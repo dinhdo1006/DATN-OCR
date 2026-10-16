@@ -70,7 +70,7 @@ Thesis/
 Ngoài Thesis (cùng thư mục cha):
 
 - `hieu_vietocr/` — train + dataset + weights gốc  
-- `template_nifi.xml`, `Thesis.pdf`, đề cương `.docx` — bản gốc  
+- `BaoCao_DATN_NguyenDinhDo.docx` / `.pdf` (bản mới nhất, 16/10), `Slide_DATN_NguyenDinhDo.pptx`, đề cương `.docx` (bản đúng lịch), mẫu trình bày ĐATN, `TaiLieu_TimHieu_DoAn`. Các bản sao lưu cũ và `template_nifi.xml` gốc đã xóa ngày 16/10 (bản đúng: `OCR_pipeline/template_nifi.xml`)  
 
 ---
 
@@ -170,7 +170,7 @@ Recall thấp ở trang 3–4 do **bảng chỉ cắt thành ảnh, chưa OCR ch
 - Web UI: `#doc=<id>` mở thẳng tài liệu; route bắt cuối `/api/documents/{path}` trả 400 cho id chứa `/` hoặc `..` (TC10).
 - **vietocr build**: build cache mất + mạng chậm làm tải PyTorch lỗi. Khi chỉ đổi `app.py`, vá nhanh: `FROM vietocr-worker-cpu` + `COPY app.py .` rồi tag lại `vietocr-worker-cpu`.
 - Kết quả đo (tools/results/): đề cương 4 trang có bảng **CER 5,44%, F1 từ 88,21%**, 54,9 s/trang; mẫu ĐATN 10 trang F1 77,7%, **36,1 s/trang** (đáp án có header/footer + chấm dẫn mục lục). TC01–TC11 đạt: `tools/results/kiem_thu_2026-10-08.md`.
-- Báo cáo `..\BaoCao_DATN_NguyenDinhDo.docx` (+ .pdf) và slide `..\Slide_DATN_NguyenDinhDo.pptx` đã cập nhật; bản 06/10 giữ lại với hậu tố "(ban 06-10)". Còn để sinh viên điền: 3 ảnh chụp (docker compose ps, canvas NiFi, MinIO Console) và số "ĐỢT ……" ở tiêu đề trang.
+- Báo cáo `..\BaoCao_DATN_NguyenDinhDo.docx` (+ .pdf) và slide `..\Slide_DATN_NguyenDinhDo.pptx` đã cập nhật. Còn để sinh viên điền: 3 ảnh chụp (docker compose ps, canvas NiFi, MinIO Console) và số "ĐỢT ……" ở tiêu đề trang.
 - Tài liệu cũ `Slide_MathModelling` trên UI kẹt "Đang nhận dạng 27/27" là dữ liệu chạy trước khi sửa lỗi (kết quả từng ghi vào `final/raw/`), không phải lỗi mới.
 
 ## 7b5. Session 2026-10-15 (máy mới `C:\Users\hi`, Docker trống)
