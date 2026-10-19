@@ -84,7 +84,8 @@ consumer = KafkaConsumer(
     bootstrap_servers=[broker],
     group_id="layout-detector-group",
     auto_offset_reset="latest",
-    enable_auto_commit=True,
+    # Commit thủ công sau khi đã gửi layout-completed: sập giữa chừng thì trang được xử lý lại
+    enable_auto_commit=False,
     value_deserializer=lambda x: json.loads(x.decode("utf-8"))
 )
 
@@ -172,3 +173,5 @@ for message in consumer:
 
     except Exception as e:
         logging.exception(f"ERROR: {e}")
+    finally:
+        consumer.commit()

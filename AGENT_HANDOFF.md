@@ -206,6 +206,15 @@ Lưu ý: tạo NiFi mới thì ListS3 xử lý lại **mọi** PDF trong `raw/` 
 - Còn sinh viên tự làm: điền "ĐỢT ……" ở tiêu đề trang; thống nhất học hàm GVHD (báo cáo/slide ghi "TS.", đề cương ghi "ThS.").
 - File mẫu `Mau trinh bay DATN CNPM - 21 07 2025.docx` không còn trong thư mục cha (không do agent xóa).
 
+## 7b8. Sửa lỗi 19/10/2026 (thứ tự đọc nhiều cột, commit an toàn)
+
+Chi tiết + số đo: `tools/results/kiem_thu_2026-10-19.md`.
+- **Thứ tự đọc nhiều cột:** paddleocr gắn `region_id`/`region_bbox` vào box (vietocr chuyển tiếp); reconstruct `order_regions()` chia vùng thành dải theo y, dải có vùng hai phía đường giữa trang → cột trái rồi cột phải; gom dòng trên toàn bộ box của từng cột (YOLO có thể trả vùng chồng nhau). Box thiếu thông tin vùng → cách cũ. TC14 đạt.
+- **Commit an toàn:** reconstruct chỉ commit tới offset nhỏ nhất của box thuộc trang chưa ghi MinIO, và `load_stored_boxes()` nạp lại trang đã ghi từ `preprocessed/…json` (JSON nay lưu thêm region). layout, paddleocr commit thủ công. TC15 (kill reconstruct giữa trang) đạt.
+- **preprocess:** thư mục tạm riêng mỗi yêu cầu, xóa sau khi gửi ZIP.
+- Đo lại: đề cương CER 4,95% (5,44% trước), F1 88,21% không đổi; mẫu 10 trang CER 38,10%, F1 77,51% không đổi. Báo cáo giữ số cũ làm mốc + thêm đoạn đo lại ở mục 3.10; lỗi (viii)–(x), TC14–TC15 (15 ca), mục Đóng góp, slide 5/13/18/22 đã cập nhật.
+- Bộ câu hỏi bảo vệ (Claude Docs) **chưa cập nhật** bảng "Điểm yếu" cho 4 lỗi đã sửa (connector Docs mất kết nối 19/10).
+
 ## 7c. Lưu ý vận hành
 
 - Docker Desktop dùng chung ~8 GB RAM với CVAT/nuclio. Khi quá tải engine có thể treo (`docker stop` không phản hồi); cách gỡ: restart máy, rồi dừng CVAT trước khi chạy OCR nặng.

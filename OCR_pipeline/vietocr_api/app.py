@@ -176,6 +176,8 @@ def main():
                 "coordinates": data.get("coordinates"),
                 "content_type": data.get("content_type", "text"),
                 "table_id": data.get("table_id"),
+                "region_id": data.get("region_id"),
+                "region_bbox": data.get("region_bbox"),
                 "recognized_text": txt,
                 "timestamp": time.time()
             }

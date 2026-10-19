@@ -81,6 +81,74 @@ def group_lines(boxes):
 
 
 # =========================
+# THỨ TỰ ĐỌC THEO VÙNG BỐ CỤC (nhiều cột)
+# =========================
+def order_regions(regions):
+    """Chia các vùng bố cục thành các nhóm đọc liền mạch, theo thứ tự đọc tự nhiên.
+
+    Vùng được chia thành các dải theo trục y (các vùng có khoảng y chồng nhau thuộc cùng một dải).
+    Trong một dải không có vùng trải rộng cả trang, nếu có vùng ở cả hai phía đường giữa trang thì
+    đọc hết cột trái rồi mới tới cột phải; ngược lại đọc từ trên xuống.
+    """
+    left = min(r["bbox"][0] for r in regions)
+    right = max(r["bbox"][2] for r in regions)
+    width = max(1, right - left)
+    mid = (left + right) / 2
+
+    def spans_page(r):
+        x1, _, x2, _ = r["bbox"]
+        return (x2 - x1) >= 0.6 * width or (x1 < mid - 0.05 * width and x2 > mid + 0.05 * width)
+
+    bands = []
+    for r in sorted(regions, key=lambda r: (r["bbox"][1], r["bbox"][0])):
+        if bands and r["bbox"][1] < bands[-1]["y2"]:
+            bands[-1]["items"].append(r)
+            bands[-1]["y2"] = max(bands[-1]["y2"], r["bbox"][3])
+        else:
+            bands.append({"y2": r["bbox"][3], "items": [r]})
+
+    # Mỗi nhóm = các vùng đọc liền một mạch (một cột của dải, hoặc cả dải); trả về theo thứ tự đọc
+    groups = []
+    for band in bands:
+        items = band["items"]
+        cx = lambda r: (r["bbox"][0] + r["bbox"][2]) / 2
+        lefts = [r for r in items if cx(r) < mid]
+        rights = [r for r in items if cx(r) >= mid]
+        if lefts and rights and not any(spans_page(r) for r in items):
+            # Thụt lề của cột phải tính từ mép trái cột phải, không phải mép trái trang
+            base = min(r["bbox"][0] for r in rights)
+            groups += [{"regions": lefts}, {"regions": rights, "indent_base": base}]
+        else:
+            groups.append({"regions": items})
+    return groups
+
+
+def reading_order_lines(boxes):
+    """Gom dòng trong từng vùng bố cục rồi nối các vùng theo thứ tự đọc.
+
+    Box không mang thông tin vùng (dữ liệu cũ) thì gom dòng trên cả trang như trước.
+    """
+    boxes = sort_boxes(boxes)
+    for b in boxes:
+        b.pop("_indent_base", None)
+    if not boxes or any(not b.get("region_bbox") for b in boxes):
+        return group_lines(boxes)
+    regions = {}
+    for b in boxes:
+        regions.setdefault(b.get("region_id"), {"bbox": b["region_bbox"], "boxes": []})["boxes"].append(b)
+    # Vùng chỉ dùng để biết box thuộc cột nào; trong một cột gom dòng trên toàn bộ box của cột,
+    # vì YOLO có thể trả nhiều vùng chồng nhau trong cùng một cột
+    lines = []
+    for g in order_regions(list(regions.values())):
+        group_boxes = [b for r in g["regions"] for b in r["boxes"]]
+        if "indent_base" in g:
+            for b in group_boxes:
+                b["_indent_base"] = g["indent_base"]
+        lines += group_lines(sort_boxes(group_boxes))
+    return lines
+
+
+# =========================
 # OUTPUT BUILDERS (văn bản Markdown + JSON)
 # =========================
 def is_table_row(line):
@@ -185,7 +253,8 @@ def build_text(lines):
 
             x_min = min(p[0] for p in b["coordinates"])
             if j == 0:
-                indent_spaces = int((x_min - min_x_global) / CHAR_WIDTH)
+                base_x = line[0].get("_indent_base", min_x_global)
+                indent_spaces = int((x_min - base_x) / CHAR_WIDTH)
                 line_str += " " * max(0, indent_spaces)
             else:
                 prev_x_max = max(p[0] for p in line[j - 1]["coordinates"])
@@ -226,6 +295,8 @@ def build_json(image, lines):
                         "table_id": b.get("table_id"),
                         "text": b.get("recognized_text", ""),
                         "coordinates": b.get("coordinates"),
+                        "region_id": b.get("region_id"),
+                        "region_bbox": b.get("region_bbox"),
                         "s3_asset_url": b.get("s3_key") if b.get("content_type") in ["figure", "table"] else None
                     } for b in line
                 ]
@@ -233,6 +304,41 @@ def build_json(image, lines):
             for i, line in enumerate(lines)
         ]
     }
+
+
+def page_keys(image):
+    base_name = os.path.splitext(os.path.basename(image))[0]
+    sub_path = os.path.dirname(image).replace("pic/", "", 1)
+    return base_name, f"text/{sub_path}/{base_name}.txt", f"preprocessed/{sub_path}/{base_name}.json"
+
+
+def load_stored_boxes(s3, image):
+    """Box của trang đã ghi trên MinIO (nếu có).
+
+    Khi worker khởi động lại hoặc box đến muộn sau khi bộ đệm bị dọn, Kafka giao lại một phần thông điệp;
+    nạp lại box đã lưu để không ghi đè trang đầy đủ bằng một bản thiếu.
+    """
+    _, _, json_key = page_keys(image)
+    try:
+        doc = json.loads(s3.get_object(Bucket=BUCKET, Key=json_key)["Body"].read().decode("utf-8"))
+    except Exception:
+        return {}
+    boxes = {}
+    for line in doc.get("lines", []):
+        for el in line.get("elements", []):
+            if el.get("box_id") is None:
+                continue
+            boxes[el["box_id"]] = {
+                "box_id": el["box_id"],
+                "content_type": el.get("type", "text"),
+                "table_id": el.get("table_id"),
+                "recognized_text": el.get("text", ""),
+                "coordinates": el.get("coordinates"),
+                "s3_key": el.get("s3_asset_url"),
+                "region_id": el.get("region_id"),
+                "region_bbox": el.get("region_bbox"),
+            }
+    return boxes
 
 
 # =========================
@@ -262,12 +368,18 @@ def main():
 
     logging.info("Reconstruct worker started...")
 
+    # Offset của box đã nhận nhưng trang chưa được ghi lên MinIO: chỉ commit tới offset nhỏ nhất trong số này,
+    # để reconstruct sập giữa chừng thì Kafka giao lại các box đó (at-least-once).
+    pending = {}      # TopicPartition -> {offset: image}
+    next_offset = {}  # TopicPartition -> offset kế tiếp đã đọc
+    committed = {}
+
     while True:
         msg_pack = consumer.poll(timeout_ms=500)
-        offsets = {}
 
         for tp, msgs in msg_pack.items():
             for msg in msgs:
+                next_offset[tp] = msg.offset + 1
                 try:
                     data = msg.value
                     image = data.get("original_image")
@@ -281,7 +393,8 @@ def main():
                         document_buffer[image] = {
                             "last_seen": time.time(),
                             "dirty": True,
-                            "boxes": {},
+                            "boxes": load_stored_boxes(s3, image),
+                            "offsets": [],
                             "total_boxes": total,
                             "total_pages": data.get("total_pages"),
                             "document_id": data.get("document_id", "unknown")
@@ -296,21 +409,24 @@ def main():
                     buf["boxes"][box_id] = data
                     buf["last_seen"] = time.time()
                     buf["dirty"] = True
-                    offsets[tp] = OffsetAndMetadata(msg.offset + 1, None)
+                    buf["offsets"].append((tp, msg.offset))
+                    pending.setdefault(tp, {})[msg.offset] = image
                 except Exception as e:
                     logging.error(f"Error parsing message: {e}")
 
-        # Quét dọn RAM buffer định kỳ
+        # Quét bộ đệm: ghi trang đủ box hoặc quá thời gian chờ
         now = time.time()
         for image, buf in list(document_buffer.items()):
             received = len(buf["boxes"])
             total = buf["total_boxes"]
             idle = now - buf["last_seen"]
 
-            # Đã ghi tạm, không có box mới: chỉ dọn RAM sau một thời gian
+            # Đã ghi, không có box mới: chỉ dọn RAM sau một thời gian
             if not buf["dirty"]:
                 if idle > EVICT_AFTER:
                     del document_buffer[image]
+                continue
+            if now < buf.get("retry_at", 0):
                 continue
 
             is_done = (total is not None) and (received >= total)
@@ -323,18 +439,10 @@ def main():
                     logging.warning(f"TIMEOUT {image}: Gathered {received}/{total} boxes (sẽ ghép lại nếu box đến muộn).")
 
                 try:
-                    boxes = list(buf["boxes"].values())
-                    boxes = sort_boxes(boxes)
-                    lines = group_lines(boxes)
-
+                    lines = reading_order_lines(list(buf["boxes"].values()))
                     text_content = build_text(lines)
                     json_content = build_json(image, lines)
-
-                    base_name = os.path.splitext(os.path.basename(image))[0]
-                    sub_path = os.path.dirname(image).replace("pic/", "", 1)
-                    
-                    txt_key = f"text/{sub_path}/{base_name}.txt"
-                    json_key = f"preprocessed/{sub_path}/{base_name}.json"
+                    base_name, txt_key, json_key = page_keys(image)
 
                     s3.put_object(Bucket=BUCKET, Key=txt_key, Body=text_content.encode("utf-8"))
                     s3.put_object(Bucket=BUCKET, Key=json_key, Body=json.dumps(json_content, ensure_ascii=False).encode("utf-8"))
@@ -353,15 +461,30 @@ def main():
                             "total_boxes": total
                         }
                     )
+                    producer.flush()
+                    # Trang đã nằm trên MinIO: các box của nó không cần Kafka giao lại nữa
+                    for tp, off in buf["offsets"]:
+                        pending.get(tp, {}).pop(off, None)
+                    buf["offsets"] = []
                     # Giữ lại (kể cả trang đủ box) để box đến muộn / tin nhắn gửi lại không tạo ra trang thiếu
                     buf["dirty"] = False
                 except Exception as e:
-                    logging.error(f"Error saving reconstruct for {image}: {e}")
-                    buf["dirty"] = False
+                    logging.error(f"Error saving reconstruct for {image}: {e} (thử lại sau 10 giây)")
+                    buf["retry_at"] = now + 10
 
-        if offsets:
-            consumer.commit(offsets=offsets)
-            producer.flush()
+        # Commit tới offset nhỏ nhất của box chưa được ghi (hoặc offset kế tiếp nếu không còn box nào chờ)
+        commits = {}
+        for tp, nxt in next_offset.items():
+            waiting = pending.get(tp)
+            off = min(waiting) if waiting else nxt
+            if committed.get(tp) != off:
+                commits[tp] = OffsetAndMetadata(off, None)
+        if commits:
+            try:
+                consumer.commit(offsets=commits)
+                committed.update({tp: c.offset for tp, c in commits.items()})
+            except Exception as e:
+                logging.warning(f"Commit offset failed: {e}")
 
 if __name__ == "__main__":
     main()

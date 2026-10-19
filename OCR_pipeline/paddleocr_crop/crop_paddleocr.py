@@ -110,7 +110,8 @@ def main():
         bootstrap_servers=[broker],
         group_id='ocr-crop-group',
         auto_offset_reset='latest',
-        enable_auto_commit=True,
+        # Commit thủ công sau khi đã gửi hết box của trang: sập giữa chừng thì trang được xử lý lại
+        enable_auto_commit=False,
         max_poll_records=10
     )
     producer = KafkaProducer(
@@ -169,7 +170,9 @@ def main():
                         shifted = [[int(p[0] + x1), int(p[1] + y1)] for p in box]
                         text_boxes.append({
                             "coordinates": shifted,
-                            "content_type": rtype
+                            "content_type": rtype,
+                            "region_id": ridx,
+                            "region_bbox": [x1, y1, x2, y2],
                         })
 
                 # Nhóm phi ngôn ngữ (figure, table) -> Cắt khối lưu S3 làm asset.
@@ -193,6 +196,8 @@ def main():
                                 "coordinates": shifted,
                                 "content_type": "table_cell",
                                 "table_id": asset_key,
+                                "region_id": ridx,
+                                "region_bbox": [x1, y1, x2, y2],
                             })
 
                     # Tạo khung tọa độ giả lập cho khối
@@ -201,7 +206,9 @@ def main():
                         "coordinates": fake_box,
                         "content_type": rtype,
                         "recognized_text": f"[{rtype.upper()}: {asset_key}]",
-                        "s3_key": asset_key
+                        "s3_key": asset_key,
+                        "region_id": ridx,
+                        "region_bbox": [x1, y1, x2, y2],
                     })
 
             removed = len(text_boxes)
@@ -265,6 +272,8 @@ def main():
                     "coordinates": b["coordinates"],
                     "content_type": b["content_type"],
                     "table_id": b.get("table_id"),
+                    "region_id": b.get("region_id"),
+                    "region_bbox": b.get("region_bbox"),
                     "created_at": time.time()
                 }
                 producer.send("crop-completed", value=msg)
@@ -285,6 +294,8 @@ def main():
                     "coordinates": env["coordinates"],
                     "content_type": env["content_type"],
                     "recognized_text": env["recognized_text"],  # Thẻ định danh [FIGURE:...]
+                    "region_id": env["region_id"],
+                    "region_bbox": env["region_bbox"],
                     "created_at": time.time()
                 }
                 producer.send("ocr-completed", value=msg_non_text)
@@ -294,6 +305,8 @@ def main():
 
         except Exception as e:
             logging.error(f"Error processing message: {e}")
+        finally:
+            consumer.commit()
 
 if __name__ == "__main__":
     main()
