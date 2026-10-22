@@ -143,7 +143,7 @@ Docker Desktop path thường gặp:
 - **VietOCR**: retry đọc S3 3 lần; crop không đọc được vẫn gửi text rỗng (không bỏ box).
 - InvokeHTTP Read Timeout 15s → 5 mins (đã đổi cả template lẫn NiFi đang chạy qua REST API).
 - Paddle: model lưu ở `OCR_pipeline/data/paddleocr_models` (volume), `logging.basicConfig(force=True)`.
-- **MinIO**: bind mount `./data/minio` trên ổ Windows gây `input/output error`, file `part.1` 0 byte → 503 `SlowDownRead`. Đã chuyển sang volume `ocr_minio_data`; thư mục `data/minio` cũ giữ làm bản sao lưu (có thể xóa).
+- **MinIO**: bind mount `./data/minio` trên ổ Windows gây `input/output error`, file `part.1` 0 byte → 503 `SlowDownRead`. Đã chuyển sang volume `ocr_minio_data`; thư mục `data/minio` cũ đã xóa ngày 22/10.
 
 ## 7b2. Sửa ngày 2026-10-08
 
@@ -222,7 +222,7 @@ Chi tiết: `tools/results/kiem_thu_2026-10-21.md`.
 - **Chờ Kafka trong worker** (22/10): `x-wait-kafka` (entrypoint chờ `KafkaAdminClient` kết nối được) – cần vì khi Docker tự bật lại container lúc khởi động máy thì healthcheck của compose không có tác dụng. Đã thử `docker desktop restart`: 0 lần khởi động lại.
 - **Kafka bền vững**: image ghi vào `/tmp/kafka-logs` trong container (mount `./data/kafka` cũ không được dùng) → `KAFKA_LOG_DIRS=/var/lib/kafka/data` + volume `ocr_kafka_data`. Tạo lại container Kafka vẫn giữ offset.
 - Chạy lại: 3 tài liệu đồng thời (web, trùng tên, `mc cp` vào `raw/`), PDF hỏng, TC02–TC04, TC10–TC11, kill VietOCR, `eval_ocr.py` (chạy trong container `ocr-web-ui`, `--api http://localhost:8080`) – tất cả đạt.
-- Báo cáo mới nhất: `..\BaoCao_DATN_NguyenDinhDo_da_sua_2.docx/.pdf` (79 trang; GVHD **ThS.**; VietOCR do sinh viên tự fine-tune, dữ liệu 5CD-AI/VietHTR-Line = TLTK [27]). Slide: `..\Slide_DATN_NguyenDinhDo_2.pptx`.
+- Báo cáo mới nhất: `..\BaoCao_DATN_2221050598_NguyenDinhDo.docx/.pdf` (79 trang; GVHD **ThS.**; VietOCR do sinh viên tự fine-tune, dữ liệu 5CD-AI/VietHTR-Line = TLTK [27]). Slide: `..\Slide_DATN_2221050598_NguyenDinhDo.pptx`.
 
 ## 7c. Lưu ý vận hành
 
