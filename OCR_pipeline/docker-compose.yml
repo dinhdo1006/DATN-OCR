@@ -1,3 +1,15 @@
+# Worker chờ Kafka trả lời rồi mới chạy chương trình chính. Cần cả khi Docker tự bật lại
+# container lúc khởi động máy (khi đó depends_on/healthcheck của compose không có tác dụng).
+x-wait-kafka: &wait-kafka
+  - sh
+  - -c
+  - |
+    until python -c "from kafka import KafkaAdminClient; KafkaAdminClient(bootstrap_servers='kafka:9092').close()" >/dev/null 2>&1; do
+      echo "Chờ Kafka sẵn sàng..."; sleep 3
+    done
+    exec "$$@"
+  - --
+
 services:
 
   # =========================
@@ -62,8 +74,18 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # Mặc định image ghi log vào /tmp/kafka-logs trong container -> mất thông điệp, offset khi tạo lại container
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
-      - ./data/kafka:/var/lib/kafka/data
+      # Docker volume (ext4 trong WSL) giống MinIO, không dùng bind mount ổ Windows
+      - kafka_data:/var/lib/kafka/data
+    # Worker chỉ khởi động khi broker trả lời được, tránh lỗi NoBrokersAvailable lúc bật hệ thống
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 15s
+      retries: 12
+      start_period: 20s
     networks:
       - ocr-network
 
@@ -87,10 +109,14 @@ services:
     build: ./layout_detector
     image: layout-worker-cpu
     container_name: layout-worker
+    entrypoint: *wait-kafka
+    command: ["python", "app.py"]
     restart: always
     depends_on:
-      - kafka
-      - minio
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       KAFKA_BROKER: kafka:9092
       MINIO_ENDPOINT: http://minio:9000
@@ -107,10 +133,14 @@ services:
     build: ./paddleocr_crop
     image: paddleocr-crop-local
     container_name: paddleocr-worker
+    entrypoint: *wait-kafka
+    command: ["python", "-u", "crop_paddleocr.py"]
     restart: always
     depends_on:
-      - kafka
-      - minio
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       KAFKA_BROKER: kafka:9092
       MINIO_ENDPOINT: http://minio:9000
@@ -129,10 +159,14 @@ services:
     build: ./vietocr_api
     image: vietocr-worker-cpu
     container_name: vietocr-worker
+    entrypoint: *wait-kafka
+    command: ["python", "-u", "app.py"]
     restart: always
     depends_on:
-      - kafka
-      - minio
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       KAFKA_BROKER: kafka:9092
       MINIO_ENDPOINT: http://minio:9000
@@ -148,10 +182,14 @@ services:
     build: ./ocr_reconstruction
     image: reconstruct-worker-local
     container_name: reconstruct-worker
+    entrypoint: *wait-kafka
+    command: ["python", "-u", "app.py"]
     restart: always
     depends_on:
-      - kafka
-      - minio
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       KAFKA_BROKER: kafka:9092
       MINIO_ENDPOINT: http://minio:9000
@@ -167,10 +205,14 @@ services:
     build: ./merge
     image: merge-worker-local
     container_name: merge-worker
+    entrypoint: *wait-kafka
+    command: ["python", "-u", "app.py"]
     restart: always
     depends_on:
-      - kafka
-      - minio
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       KAFKA_BROKER: kafka:9092
       MINIO_ENDPOINT: http://minio:9000
@@ -205,6 +247,8 @@ volumes:
   minio_data:
     name: ocr_minio_data
     external: true
+  kafka_data:
+    name: ocr_kafka_data
 
 # =========================
 # NETWORKS DEFINITION

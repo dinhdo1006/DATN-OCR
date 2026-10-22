@@ -215,6 +215,15 @@ Chi tiết + số đo: `tools/results/kiem_thu_2026-10-19.md`.
 - Đo lại: đề cương CER 4,95% (5,44% trước), F1 88,21% không đổi; mẫu 10 trang CER 38,10%, F1 77,51% không đổi. Báo cáo giữ số cũ làm mốc + thêm đoạn đo lại ở mục 3.10; lỗi (viii)–(x), TC14–TC15 (15 ca), mục Đóng góp, slide 5/13/18/22 đã cập nhật.
 - Bộ câu hỏi bảo vệ (Claude Docs) **chưa cập nhật** bảng "Điểm yếu" cho 4 lỗi đã sửa (connector Docs mất kết nối 19/10).
 
+## 7b9. Kiểm tra toàn hệ thống + sửa compose (21/10/2026)
+
+Chi tiết: `tools/results/kiem_thu_2026-10-21.md`.
+- **Kafka healthcheck**: 5 worker `depends_on: kafka: condition: service_healthy` → hết `NoBrokersAvailable` lúc bật. Khối `nifi` **không đổi** (đổi là container NiFi bị tạo lại, mất luồng).
+- **Chờ Kafka trong worker** (22/10): `x-wait-kafka` (entrypoint chờ `KafkaAdminClient` kết nối được) – cần vì khi Docker tự bật lại container lúc khởi động máy thì healthcheck của compose không có tác dụng. Đã thử `docker desktop restart`: 0 lần khởi động lại.
+- **Kafka bền vững**: image ghi vào `/tmp/kafka-logs` trong container (mount `./data/kafka` cũ không được dùng) → `KAFKA_LOG_DIRS=/var/lib/kafka/data` + volume `ocr_kafka_data`. Tạo lại container Kafka vẫn giữ offset.
+- Chạy lại: 3 tài liệu đồng thời (web, trùng tên, `mc cp` vào `raw/`), PDF hỏng, TC02–TC04, TC10–TC11, kill VietOCR, `eval_ocr.py` (chạy trong container `ocr-web-ui`, `--api http://localhost:8080`) – tất cả đạt.
+- Báo cáo mới nhất: `..\BaoCao_DATN_NguyenDinhDo_da_sua_2.docx/.pdf` (79 trang; GVHD **ThS.**; VietOCR do sinh viên tự fine-tune, dữ liệu 5CD-AI/VietHTR-Line = TLTK [27]). Slide: `..\Slide_DATN_NguyenDinhDo_2.pptx`.
+
 ## 7c. Lưu ý vận hành
 
 - Docker Desktop dùng chung ~8 GB RAM với CVAT/nuclio. Khi quá tải engine có thể treo (`docker stop` không phản hồi); cách gỡ: restart máy, rồi dừng CVAT trước khi chạy OCR nặng.
