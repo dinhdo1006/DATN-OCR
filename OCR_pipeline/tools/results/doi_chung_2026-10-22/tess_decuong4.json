@@ -1,0 +1,68 @@
+{
+  "label": "Tesseract 5 (vie) decuong4",
+  "overall": {
+    "cer": 0.08513238289205703,
+    "wer": 0.1362290227048371,
+    "word_precision": 0.944560669456067,
+    "word_recall": 0.8914116485686081,
+    "word_f1": 0.9172168613509396
+  },
+  "pages": [
+    {
+      "page": "page_1",
+      "gt_chars": 1158,
+      "char_edits": 180,
+      "gt_words": 238,
+      "word_edits": 54,
+      "pred_words": 213,
+      "common_words": 198,
+      "cer": 0.15544041450777202,
+      "wer": 0.226890756302521,
+      "word_precision": 0.9295774647887324,
+      "word_recall": 0.8319327731092437,
+      "word_f1": 0.8780487804878049
+    },
+    {
+      "page": "page_2",
+      "gt_chars": 2157,
+      "char_edits": 38,
+      "gt_words": 452,
+      "word_edits": 24,
+      "pred_words": 442,
+      "common_words": 429,
+      "cer": 0.01761706073249884,
+      "wer": 0.05309734513274336,
+      "word_precision": 0.9705882352941176,
+      "word_recall": 0.9491150442477876,
+      "word_f1": 0.959731543624161
+    },
+    {
+      "page": "page_3",
+      "gt_chars": 1005,
+      "char_edits": 68,
+      "gt_words": 198,
+      "word_edits": 32,
+      "pred_words": 184,
+      "common_words": 166,
+      "cer": 0.06766169154228856,
+      "wer": 0.16161616161616163,
+      "word_precision": 0.9021739130434783,
+      "word_recall": 0.8383838383838383,
+      "word_f1": 0.869109947643979
+    },
+    {
+      "page": "page_4",
+      "gt_chars": 590,
+      "char_edits": 132,
+      "gt_words": 125,
+      "word_edits": 28,
+      "pred_words": 117,
+      "common_words": 110,
+      "cer": 0.22372881355932203,
+      "wer": 0.224,
+      "word_precision": 0.9401709401709402,
+      "word_recall": 0.88,
+      "word_f1": 0.909090909090909
+    }
+  ]
+}

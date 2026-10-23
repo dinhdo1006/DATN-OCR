@@ -28,7 +28,9 @@ MODEL_PATH = os.getenv(
     "models/doclayout_yolo_docstructbench_imgsz1024.pt"
 )
 
-logging.info("Loading layout model...")
+DEVICE = os.getenv("DEVICE", "cpu")
+
+logging.info(f"Loading layout model... (device={DEVICE})")
 model = YOLO(MODEL_PATH)
 
 # --- KHU VỰC VÁ LỖI CHO MÔ HÌNH CUSTOM (MONKEYPATCH) ---
@@ -96,8 +98,8 @@ producer = KafkaProducer(
 )
 
 def detect_layout(img):
-    # Đảm bảo ép chạy hoàn toàn trên CPU
-    results = model.predict(img, conf=0.25, device="cpu", verbose=False)
+    # Mặc định chạy trên CPU; DEVICE=cuda khi chạy kèm docker-compose.gpu.yml
+    results = model.predict(img, conf=0.25, device=DEVICE, verbose=False)
     regions = []
     boxes = results[0].boxes
 

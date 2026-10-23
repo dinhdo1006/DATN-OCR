@@ -1,0 +1,26 @@
+# Bản GPU (CUDA 11.8) của layout-worker, dùng kèm docker-compose.gpu.yml.
+# Khác dockerfile CPU duy nhất ở bước cài PyTorch.
+# CUDA 11.8 chạy được với driver NVIDIA từ 520 trở lên; bản CUDA 12.6 cần driver hỗ trợ CUDA 12.6
+# (trên WSL 2, driver chỉ hỗ trợ CUDA 12.0 báo lỗi "CUDA-capable device(s) is/are busy or unavailable").
+FROM python:3.10-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir \
+      torch==2.7.1+cu118 torchvision==0.22.1+cu118 \
+      --extra-index-url https://download.pytorch.org/whl/cu118
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "app.py"]

@@ -30,7 +30,9 @@ from vietocr.tool.config import Cfg
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 # Batch Size = 4 (Cân bằng: nhanh hơn xử lý từng ảnh nhưng không ngốn nhiều RAM)
-BATCH_SIZE = 4 
+# Chạy GPU (DEVICE=cuda) có thể tăng lô, ví dụ BATCH_SIZE=16
+BATCH_SIZE = int(os.getenv("BATCH_SIZE", "4"))
+DEVICE = os.getenv("DEVICE", "cpu")
 
 # =====================================================
 # INIT S3
@@ -59,7 +61,7 @@ def init_vietocr():
 
     config["weights"] = weights_path
     config["cnn"]["pretrained"] = False
-    config["device"] = "cpu"
+    config["device"] = DEVICE
     config["predictor"]["beamsearch"] = False
 
     logging.info(f"Loading VietOCR weights: {weights_path}")
@@ -130,7 +132,7 @@ def main():
         value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode()
     )
 
-    logging.info(f"VietOCR Worker started (Batch={BATCH_SIZE}, Threads={NUM_THREADS})")
+    logging.info(f"VietOCR Worker started (Batch={BATCH_SIZE}, Threads={NUM_THREADS}, Device={DEVICE})")
 
     while True:
         packs = consumer.poll(timeout_ms=500, max_records=BATCH_SIZE)

@@ -40,6 +40,24 @@
   .empty { color:var(--muted); padding:12px 0; }
   #msg { margin-top:10px; min-height:20px; font-size:14px; }
   .err { color:#dc2626; }
+  .tools { display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; }
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px; overflow:hidden; }
+  .seg button { background:transparent; color:var(--muted); border-radius:0; padding:5px 10px; }
+  .seg button.on { background:var(--accent); color:#fff; }
+  a.btn.alt { background:transparent; color:var(--accent); border:1px solid var(--accent); padding:5px 10px; }
+  #doc { max-height:620px; overflow:auto; font-size:14px; }
+  #doc .page { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; border-top:1px solid var(--line); padding-top:8px; margin:14px 0 6px; }
+  #doc .page:first-child { border-top:0; margin-top:0; padding-top:0; }
+  #doc h3 { font-size:15px; margin:12px 0 6px; }
+  #doc .ln { white-space:pre-wrap; margin:0; }
+  #doc .para { margin:0 0 8px; }
+  #doc ul { margin:4px 0 8px; padding-left:22px; }
+  #doc table.md { width:auto; max-width:100%; margin:6px 0 10px; font-size:13px; }
+  #doc table.md th, #doc table.md td { border:1px solid var(--line); padding:4px 8px; vertical-align:top; }
+  #doc table.md th { color:var(--text); font-weight:600; background:color-mix(in srgb, var(--accent) 6%, transparent); }
+  #doc figure { margin:6px 0 10px; }
+  #doc figure img { max-width:100%; border:1px solid var(--line); border-radius:4px; }
+  #doc figcaption, #doc summary { color:var(--muted); font-size:12px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -61,9 +79,17 @@
     <div class="card">
       <div class="head">
         <h2 id="title">Kết quả</h2>
-        <span><a class="btn" id="dl" style="display:none">Tải .txt</a></span>
+        <span class="tools">
+          <span class="seg"><button id="vDoc" class="on">Trình bày</button><button id="vRaw">Văn bản</button></span>
+          <span id="dls" style="display:none">
+            <a class="btn" id="dlMd">Tải .md</a>
+            <a class="btn alt" id="dlJson">.json</a>
+            <a class="btn alt" id="dlTxt">.txt</a>
+          </span>
+        </span>
       </div>
-      <pre id="out" class="empty">Chọn một tài liệu để xem nội dung.</pre>
+      <div id="doc" class="empty">Chọn một tài liệu để xem nội dung.</div>
+      <pre id="out" style="display:none"></pre>
     </div>
   </div>
 </main>
@@ -110,21 +136,86 @@ async function loadList() {
   } catch (e) { say('Không tải được danh sách: ' + e.message, true); }
 }
 
+// Dựng lại kết quả có cấu trúc từ Markdown do merge-worker xuất: tiêu đề, bảng, danh sách,
+// thẻ [TABLE: …]/[FIGURE: …] trỏ tới ảnh gốc trong assets/. Viết tay để không phụ thuộc thư viện ngoài.
+const asset = k => '/api/assets?key=' + encodeURIComponent(k);
+function cells(line) { return line.trim().replace(/^\||\|$/g, '').split('|').map(c => esc(c.trim())); }
+function renderMd(md) {
+  const lines = md.replace(/\r/g, '').split('\n');
+  const html = []; let para = [];
+  const flush = () => { if (para.length) { html.push('<div class="para">' + para.map(l => `<p class="ln">${esc(l)}</p>`).join('') + '</div>'); para = []; } };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i], t = l.trim();
+    let m;
+    if ((m = t.match(/^<!--\s*(page_\d+)\s*-->$/) || t.match(/^=====\s*PAGE\s+(page_\d+)\s*=====$/))) {
+      flush(); html.push(`<div class="page">Trang ${esc(m[1].replace('page_', ''))}</div>`);
+    } else if (t === '---') { flush();
+    } else if (!t) { flush();
+    } else if ((m = t.match(/^#{1,6}\s+(.*)$/))) { flush(); html.push(`<h3>${esc(m[1])}</h3>`);
+    } else if ((m = t.match(/^\[(TABLE|FIGURE):\s*([^\]]+)\]$/))) {
+      flush();
+      const img = `<img loading="lazy" src="${asset(m[2].trim())}" alt="${m[1] === 'TABLE' ? 'Ảnh bảng gốc' : 'Hình'}">`;
+      html.push(m[1] === 'TABLE'
+        ? `<details><summary>Xem ảnh bảng gốc</summary><figure>${img}</figure></details>`
+        : `<figure>${img}<figcaption>Hình được tách thành ảnh riêng</figcaption></figure>`);
+    } else if (t.startsWith('|')) {
+      flush();
+      const rows = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) rows.push(lines[i++].trim());
+      i--;
+      const sep = rows.length > 1 && /^\|?\s*:?-{3,}/.test(rows[1]);
+      const head = sep ? `<thead><tr>${cells(rows[0]).map(c => `<th>${c}</th>`).join('')}</tr></thead>` : '';
+      const body = (sep ? rows.slice(2) : rows).map(r => `<tr>${cells(r).map(c => `<td>${c}</td>`).join('')}</tr>`).join('');
+      html.push(`<table class="md">${head}<tbody>${body}</tbody></table>`);
+    } else if ((m = t.match(/^[-•]\s+(.*)$/))) {
+      flush();
+      const items = [];
+      while (i < lines.length && (m = lines[i].trim().match(/^[-•]\s+(.*)$/))) { items.push(`<li>${esc(m[1])}</li>`); i++; }
+      i--;
+      html.push(`<ul>${items.join('')}</ul>`);
+    } else { para.push(l); }
+  }
+  flush();
+  return html.join('');
+}
+
+let view = 'doc', current = null;
+function show() {
+  const d = current; if (!d) return;
+  const docEl = $('#doc'), out = $('#out');
+  if (d.error) {
+    docEl.style.display = ''; out.style.display = 'none';
+    docEl.className = 'err';
+    docEl.textContent = `Không xử lý được tài liệu. Lý do: ${d.error.message || 'không rõ'}` + (d.error.status_code ? ` (HTTP ${d.error.status_code})` : '');
+    return;
+  }
+  const text = d.text || '(Chưa có trang nào được nhận dạng xong)';
+  docEl.className = '';
+  if (view === 'doc') {
+    const keep = docEl.scrollTop;
+    docEl.innerHTML = renderMd(d.markdown || text); docEl.scrollTop = keep;
+    docEl.style.display = ''; out.style.display = 'none';
+  } else {
+    out.textContent = text; out.style.display = ''; docEl.style.display = 'none';
+  }
+  $('#vDoc').classList.toggle('on', view === 'doc'); $('#vRaw').classList.toggle('on', view === 'raw');
+}
+
 async function loadDoc() {
   if (!selected) return;
   const r = await fetch('/api/documents/' + encodeURIComponent(selected));
   if (!r.ok) return;
   const d = await r.json();
+  const changed = !current || current.id !== d.id || current.text !== d.text || current.markdown !== d.markdown || current.status !== d.status;
+  current = d;
   $('#title').textContent = 'Kết quả: ' + d.id + (d.final ? '' : ' (tạm thời)');
-  const out = $('#out');
-  out.className = d.error ? 'err' : '';
-  out.textContent = d.error
-    ? `Không xử lý được tài liệu.\nLý do: ${d.error.message || 'không rõ'}` + (d.error.status_code ? ` (HTTP ${d.error.status_code})` : '')
-    : (d.text || '(Chưa có trang nào được nhận dạng xong)');
-  const dl = $('#dl');
-  dl.style.display = d.final ? '' : 'none';
-  dl.href = '/api/documents/' + encodeURIComponent(d.id) + '/download';
+  const base = '/api/documents/' + encodeURIComponent(d.id) + '/download?fmt=';
+  $('#dls').style.display = d.final ? '' : 'none';
+  $('#dlMd').href = base + 'md'; $('#dlJson').href = base + 'json'; $('#dlTxt').href = base + 'txt';
+  if (changed) show();
 }
+$('#vDoc').onclick = () => { view = 'doc'; show(); };
+$('#vRaw').onclick = () => { view = 'raw'; show(); };
 
 const drop = $('#drop'), input = $('#file');
 drop.onclick = () => input.click();

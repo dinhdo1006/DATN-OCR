@@ -1,0 +1,70 @@
+{
+  "doc_id": "decuong4_quet",
+  "overall": {
+    "cer": 0.0835030549898167,
+    "wer": 0.20533070088845015,
+    "word_precision": 0.8668796592119276,
+    "word_recall": 0.8035538005923001,
+    "word_f1": 0.834016393442623
+  },
+  "pages": [
+    {
+      "page": "page_1",
+      "gt_chars": 1158,
+      "char_edits": 170,
+      "gt_words": 238,
+      "word_edits": 67,
+      "pred_words": 214,
+      "common_words": 178,
+      "cer": 0.14680483592400692,
+      "wer": 0.2815126050420168,
+      "word_precision": 0.8317757009345794,
+      "word_recall": 0.7478991596638656,
+      "word_f1": 0.7876106194690267
+    },
+    {
+      "page": "page_2",
+      "gt_chars": 2157,
+      "char_edits": 92,
+      "gt_words": 452,
+      "word_edits": 71,
+      "pred_words": 441,
+      "common_words": 383,
+      "cer": 0.04265183124710246,
+      "wer": 0.1570796460176991,
+      "word_precision": 0.8684807256235828,
+      "word_recall": 0.8473451327433629,
+      "word_f1": 0.8577827547592386
+    },
+    {
+      "page": "page_3",
+      "gt_chars": 1005,
+      "char_edits": 37,
+      "gt_words": 198,
+      "word_edits": 35,
+      "pred_words": 186,
+      "common_words": 163,
+      "cer": 0.03681592039800995,
+      "wer": 0.17676767676767677,
+      "word_precision": 0.8763440860215054,
+      "word_recall": 0.8232323232323232,
+      "word_f1": 0.8489583333333334
+    },
+    {
+      "page": "page_4",
+      "gt_chars": 590,
+      "char_edits": 111,
+      "gt_words": 125,
+      "word_edits": 35,
+      "pred_words": 98,
+      "common_words": 90,
+      "cer": 0.188135593220339,
+      "wer": 0.28,
+      "word_precision": 0.9183673469387755,
+      "word_recall": 0.72,
+      "word_f1": 0.8071748878923766
+    }
+  ],
+  "timing": null,
+  "resources": null
+}

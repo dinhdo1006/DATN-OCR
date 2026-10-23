@@ -2,7 +2,7 @@
 
 > **Đọc file này trước** khi agent / người mới tiếp tục dự án.  
 > Hướng dẫn chạy thường ngày nằm ở `README.txt`.  
-> **Cập nhật lần cuối:** 2026-10-16 trưa (báo cáo + slide hoàn thiện, bộ câu hỏi bảo vệ – mục 7b7; xử lý lỗi NiFi – 7b6; 15/10: dựng lại stack trên máy mới, so sánh trọng số VietOCR).  
+> **Cập nhật lần cuối:** 2026-10-23 (theo nhận xét GVHD: đối chứng Tesseract/PaddleOCR, đo hiệu năng lặp lại CPU/GPU, sửa OOM tiền xử lý, mở rộng ngang – mục 7b10).
 > **Workspace:** `d:\Đồ án công nghệ phần mềm\Thesis`
 
 ---
@@ -224,6 +224,18 @@ Chi tiết: `tools/results/kiem_thu_2026-10-21.md`.
 - Chạy lại: 3 tài liệu đồng thời (web, trùng tên, `mc cp` vào `raw/`), PDF hỏng, TC02–TC04, TC10–TC11, kill VietOCR, `eval_ocr.py` (chạy trong container `ocr-web-ui`, `--api http://localhost:8080`) – tất cả đạt.
 - Báo cáo mới nhất: `..\BaoCao_DATN_2221050598_NguyenDinhDo.docx/.pdf` (79 trang; GVHD **ThS.**; VietOCR do sinh viên tự fine-tune, dữ liệu 5CD-AI/VietHTR-Line = TLTK [27]). Slide: `..\Slide_DATN_2221050598_NguyenDinhDo.pptx`.
 
+## 7b10. Theo nhận xét của GVHD: đối chứng, hiệu năng lặp lại, GPU, mở rộng (22–23/10/2026)
+
+Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối chứng: `tools/results/doi_chung_2026-10-22/`.
+- **Đối chứng** Tesseract 5.5 (vie, psm 3) và PaddleOCR 2.7 (vi/Latin) trên cùng ảnh trang + đáp án, cả bản quét mô phỏng (`tools/degrade_pdf.py`): `tools/baseline_ocr.py`, `tools/score_dir.py`. Kết luận trung thực: chữ thuần hệ thống ≈/kém Tesseract (F1 thấp hơn 0,6–8 điểm), hơn hẳn PaddleOCR (mất dấu); khác biệt chính là cấu trúc (bảng, thứ tự đọc).
+- **GPU tùy chọn**: `docker-compose.gpu.yml` + `dockerfile.gpu` (PyTorch 2.7.1+**cu118** – driver 528.79 chỉ CUDA 12.0, bản cu126 lỗi trong WSL). `DEVICE` env trong layout/vietocr, VietOCR lô 16 trên GPU. Chạy: `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build --no-deps layout_detector vietocr`; về CPU: `docker compose up -d --no-deps layout_detector vietocr`. Kết quả nhận dạng trùng CPU.
+- **Đo lặp lại** `tools/bench.py` (chạy trong `ocr-web-ui`, `--api http://localhost:8080`, `--runs`, `--concurrent`): CPU (máy rảnh) 10 trang 125,0 ± 3,8 s, 42 trang 534,2 s; GPU 35,4 ± 4,6 s, 155,9 s, 120 trang 574,1 s. Đo CPU ban ngày bị nhiễu do người dùng chạy Chrome (~1–2 nhân) → không dùng làm số chính.
+- **Lỗi OOM đã sửa**: `Preprocess_service/preprocess.py` nạp mọi trang 300 DPI vào RAM → GPU + 42 trang làm máy ảo Docker (7,67 GB) hết RAM, layout-worker bị kill (137). Đổi sang chuyển từng trang (`pdfinfo_from_path` + `first_page/last_page`), ảnh trùng md5, còn nhanh hơn.
+- **Mở rộng ngang**: `docker-compose.scale.yml` (service `vietocr_2`). Topic `crop-completed` **hiện có 2 partition** (để lại, vô hại). 2 bản sao: 5 người nhanh 1,9×, 42 trang 1,6×.
+- Công cụ thêm: `tools/fetch_pages.py` (tải text từng trang để chấm lại), `tools/clean_bench.py` (xóa dữ liệu `bench_*` khỏi MinIO).
+- Web UI: chế độ Trình bày (render Markdown, ảnh bảng/hình qua `/api/assets`), tải `.md/.json/.txt` (`?fmt=`).
+- Báo cáo 86 trang: mục 3.6 (4 hình mới, chữ to), 3.9 viết lại (Bảng 3-6 CPU/GPU, năng lực 120 trang / 5 người, OOM, mở rộng), 3.10 thêm Bảng 3-8/3-9 đối chứng, TC16–TC19 (19 ca), Bảng 3-4 thêm 2 lỗi, Phụ lục 4 thêm lệnh GPU/scale/bench. Slide 26 trang: thay hình slide 7/10/12/17/22, thêm slide 20 (đối chứng) và 21 (hiệu năng).
+
 ## 7c. Lưu ý vận hành
 
 - Docker Desktop dùng chung ~8 GB RAM với CVAT/nuclio. Khi quá tải engine có thể treo (`docker stop` không phản hồi); cách gỡ: restart máy, rồi dừng CVAT trước khi chạy OCR nặng.
@@ -242,7 +254,7 @@ Chi tiết: `tools/results/kiem_thu_2026-10-21.md`.
 
 ## 9. Việc nên làm tiếp
 
-0. **Việc nên làm tiếp:** (a) cải thiện dấu tiếng Việt (fine-tune VietOCR / hậu xử lý ngôn ngữ); (b) bộ tài liệu quét có đáp án để đo; (c) sinh viên chụp 3 ảnh còn thiếu trong báo cáo  
+0. **Việc nên làm tiếp:** (a) cải thiện dấu tiếng Việt với chữ in (fine-tune VietOCR trên chữ in / hậu xử lý ngôn ngữ) để vượt Tesseract; (b) bộ tài liệu quét thực tế có đáp án; (c) nếu cần số CPU 120 trang đo trực tiếp: để máy rảnh rồi chạy `python bench.py --api http://localhost:8080 --pdf mau120trang.pdf --label cpu_120` trong ocr-web-ui  
 1. Bật Docker → `cd OCR_pipeline` → `docker compose up -d` → `docker compose ps`  
 2. Upload PDF qua Web UI http://localhost:8501 (hoặc MinIO `data-lake/raw/`)  
 3. Theo dõi log: `layout-worker`, `paddleocr-worker`, `vietocr-worker`, `reconstruct-worker`, `merge-worker`  

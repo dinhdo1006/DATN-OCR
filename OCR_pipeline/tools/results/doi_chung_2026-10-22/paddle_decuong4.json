@@ -1,0 +1,68 @@
+{
+  "label": "PaddleOCR (vi) decuong4",
+  "overall": {
+    "cer": 0.19470468431771895,
+    "wer": 0.7729516288252715,
+    "word_precision": 0.2375249500998004,
+    "word_recall": 0.2349457058242843,
+    "word_f1": 0.23622828784119107
+  },
+  "pages": [
+    {
+      "page": "page_1",
+      "gt_chars": 1158,
+      "char_edits": 255,
+      "gt_words": 238,
+      "word_edits": 178,
+      "pred_words": 236,
+      "common_words": 66,
+      "cer": 0.22020725388601037,
+      "wer": 0.7478991596638656,
+      "word_precision": 0.2796610169491525,
+      "word_recall": 0.2773109243697479,
+      "word_f1": 0.27848101265822783
+    },
+    {
+      "page": "page_2",
+      "gt_chars": 2157,
+      "char_edits": 432,
+      "gt_words": 452,
+      "word_edits": 376,
+      "pred_words": 444,
+      "common_words": 76,
+      "cer": 0.20027816411682892,
+      "wer": 0.831858407079646,
+      "word_precision": 0.17117117117117117,
+      "word_recall": 0.168141592920354,
+      "word_f1": 0.16964285714285715
+    },
+    {
+      "page": "page_3",
+      "gt_chars": 1005,
+      "char_edits": 144,
+      "gt_words": 198,
+      "word_edits": 133,
+      "pred_words": 196,
+      "common_words": 65,
+      "cer": 0.14328358208955225,
+      "wer": 0.6717171717171717,
+      "word_precision": 0.33163265306122447,
+      "word_recall": 0.3282828282828283,
+      "word_f1": 0.3299492385786802
+    },
+    {
+      "page": "page_4",
+      "gt_chars": 590,
+      "char_edits": 125,
+      "gt_words": 125,
+      "word_edits": 96,
+      "pred_words": 126,
+      "common_words": 31,
+      "cer": 0.211864406779661,
+      "wer": 0.768,
+      "word_precision": 0.24603174603174602,
+      "word_recall": 0.248,
+      "word_f1": 0.24701195219123503
+    }
+  ]
+}

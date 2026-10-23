@@ -1,0 +1,19 @@
+# Chạy thêm một bản sao vietocr-worker (cùng consumer group vietocr-group) để tăng thông lượng
+# bước nhận dạng, bước chậm nhất của luồng.
+#
+# Điều kiện: topic crop-completed phải có ít nhất 2 partition, nếu không bản sao thứ hai không nhận
+# được thông điệp nào. Tăng partition (chỉ cần làm một lần, dữ liệu Kafka nằm trong volume):
+#   docker exec kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --alter --topic crop-completed --partitions 2
+#   docker compose up -d --no-deps --force-recreate vietocr paddleocr
+#
+# Khởi động bản sao:
+#   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --no-deps vietocr_2
+# Tắt bản sao:
+#   docker compose -f docker-compose.yml -f docker-compose.scale.yml rm -sf vietocr_2
+
+services:
+  vietocr_2:
+    extends:
+      file: docker-compose.yml
+      service: vietocr
+    container_name: vietocr-worker-2

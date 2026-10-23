@@ -7,7 +7,7 @@ import logging
 import boto3
 from botocore.exceptions import ClientError
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.responses import FileResponse, Response
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -156,6 +156,9 @@ def document(doc_id: str):
 
     if info["final"]:
         info["text"] = read_text(f"final/{doc_id}/{doc_id}.txt")
+        # Bản Markdown giữ tiêu đề, bảng và thẻ ảnh bảng/hình để giao diện trình bày lại có cấu trúc
+        md_key = f"final/{doc_id}/{doc_id}.md"
+        info["markdown"] = read_text(md_key) if exists(md_key) else info["text"]
     else:
         # Chưa merge: hiển thị tạm các trang đã OCR xong
         pages = sorted(
@@ -167,15 +170,37 @@ def document(doc_id: str):
     return info
 
 
+DOWNLOAD_TYPES = {
+    "txt": "text/plain; charset=utf-8",
+    "md": "text/markdown; charset=utf-8",
+    "json": "application/json; charset=utf-8",
+}
+
+
 @app.get("/api/documents/{doc_id}/download")
-def download(doc_id: str):
-    key = f"final/{doc_id}/{doc_id}.txt"
+def download(doc_id: str, fmt: str = "txt"):
+    if fmt not in DOWNLOAD_TYPES:
+        raise HTTPException(400, "Định dạng phải là txt, md hoặc json")
+    key = f"final/{doc_id}/{doc_id}.{fmt}"
     if "/" in doc_id or ".." in doc_id or not exists(key):
         raise HTTPException(404, "Chưa có kết quả cuối cùng")
-    return PlainTextResponse(
-        read_text(key),
-        headers={"Content-Disposition": f'attachment; filename="{doc_id}.txt"'},
+    return Response(
+        s3.get_object(Bucket=BUCKET, Key=key)["Body"].read(),
+        media_type=DOWNLOAD_TYPES[fmt],
+        headers={"Content-Disposition": f'attachment; filename="{doc_id}.{fmt}"'},
     )
+
+
+@app.get("/api/assets")
+def asset(key: str):
+    # Ảnh bảng/hình do paddleocr-worker cắt ra; chỉ cho đọc trong assets/ để không lộ dữ liệu khác
+    if not key.startswith("assets/") or ".." in key or not key.lower().endswith((".png", ".jpg", ".jpeg")):
+        raise HTTPException(400, "Khóa ảnh không hợp lệ")
+    try:
+        body = s3.get_object(Bucket=BUCKET, Key=key)["Body"].read()
+    except ClientError:
+        raise HTTPException(404, "Không có ảnh")
+    return Response(body, media_type="image/png", headers={"Cache-Control": "max-age=3600"})
 
 
 @app.get("/api/documents/{doc_path:path}")

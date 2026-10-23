@@ -1,0 +1,36 @@
+# Chạy layout-worker và vietocr-worker trên GPU NVIDIA (PyTorch CUDA 11.8: driver NVIDIA >= 520, Docker Desktop/WSL 2).
+# Mặc định hệ thống chạy CPU; bật GPU bằng:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build --no-deps layout_detector vietocr
+# Quay về CPU:
+#   docker compose up -d --no-deps layout_detector vietocr
+services:
+  layout_detector:
+    build:
+      context: ./layout_detector
+      dockerfile: dockerfile.gpu
+    image: layout-worker-gpu
+    environment:
+      DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  vietocr:
+    build:
+      context: ./vietocr_api
+      dockerfile: dockerfile.gpu
+    image: vietocr-worker-gpu
+    environment:
+      DEVICE: cuda
+      BATCH_SIZE: "16"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

@@ -1,0 +1,68 @@
+{
+  "label": "  Tesseract 5 (vie)",
+  "overall": {
+    "cer": 0.090020366598778,
+    "wer": 0.1579466929911155,
+    "word_precision": 0.9234800838574424,
+    "word_recall": 0.8696939782823297,
+    "word_f1": 0.8957803762074226
+  },
+  "pages": [
+    {
+      "page": "page_1",
+      "gt_chars": 1158,
+      "char_edits": 242,
+      "gt_words": 238,
+      "word_edits": 70,
+      "pred_words": 204,
+      "common_words": 185,
+      "cer": 0.20898100172711573,
+      "wer": 0.29411764705882354,
+      "word_precision": 0.9068627450980392,
+      "word_recall": 0.7773109243697479,
+      "word_f1": 0.8371040723981901
+    },
+    {
+      "page": "page_2",
+      "gt_chars": 2157,
+      "char_edits": 52,
+      "gt_words": 452,
+      "word_edits": 31,
+      "pred_words": 446,
+      "common_words": 424,
+      "cer": 0.02410755679184052,
+      "wer": 0.06858407079646017,
+      "word_precision": 0.9506726457399103,
+      "word_recall": 0.9380530973451328,
+      "word_f1": 0.9443207126948775
+    },
+    {
+      "page": "page_3",
+      "gt_chars": 1005,
+      "char_edits": 74,
+      "gt_words": 198,
+      "word_edits": 35,
+      "pred_words": 186,
+      "common_words": 164,
+      "cer": 0.0736318407960199,
+      "wer": 0.17676767676767677,
+      "word_precision": 0.8817204301075269,
+      "word_recall": 0.8282828282828283,
+      "word_f1": 0.8541666666666666
+    },
+    {
+      "page": "page_4",
+      "gt_chars": 590,
+      "char_edits": 74,
+      "gt_words": 125,
+      "word_edits": 24,
+      "pred_words": 118,
+      "common_words": 108,
+      "cer": 0.12542372881355932,
+      "wer": 0.192,
+      "word_precision": 0.9152542372881356,
+      "word_recall": 0.864,
+      "word_f1": 0.8888888888888888
+    }
+  ]
+}
