@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 225);
+const y = 40, h = 96;
+const a = g.box(8, y, 112, h, ['Ảnh dòng', 'chữ'], { c: 'gray', fs: 17, title: false });
+const b = g.box(152, y, 142, h, ['VGG (CNN)', 'trích xuất', 'đặc trưng'], { c: 'blue', fs: 17 });
+for (let i = 0; i < 5; i++) g.box(328 + i * 20, y + 14, 16, 68, [], { c: 'blue', rx: 2, sw: 1.5 });
+g.text(376, y + h + 26, ['chuỗi vector', 'đặc trưng'], { fs: 15, a: 'middle' });
+const d = g.box(456, y, 132, h, ['Transformer', 'Encoder'], { c: 'green', fs: 17 });
+const e = g.box(614, y, 140, h, ['Transformer', 'Decoder', '(attention)'], { c: 'green', fs: 17 });
+const f = g.box(782, y, 92, h, ['Chuỗi', 'ký tự'], { c: 'orange', fs: 17, title: false });
+const my = y + h / 2;
+g.line([[a.r, my], [b.x - 2, my]]);
+g.line([[b.r, my], [324, my]]);
+g.line([[426, my], [d.x - 2, my]]);
+g.line([[d.r, my], [e.x - 2, my]]);
+g.line([[e.r, my], [f.x - 2, my]]);
+g.text(560, 200, 'Attention(Q, K, V) = softmax(QKᵀ / √dₖ) · V', { fs: 17, a: 'middle', italic: true });
+g.render();
+</script></body></html>

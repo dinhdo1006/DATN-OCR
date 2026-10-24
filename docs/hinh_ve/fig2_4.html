@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 560);
+// Tiến trình xếp dọc, kho D1 bên phải, tác nhân bên trái
+const P = [['1.0', 'Tiền xử lý'], ['2.0', 'Phân tích bố cục'], ['3.0', 'Cắt dòng chữ'], ['4.0', 'Nhận dạng chữ'], ['5.0', 'Tái cấu trúc', 'và ghép trang']];
+const cx = 360, Y = i => 56 + i * 108;
+const pr = P.map((t, i) => g.ellipse(cx, Y(i), 112, 40, t, { c: 'green', fs: 15 }));
+const flow = ['trang mới', 'vùng bố cục', 'khóa ảnh dòng', 'chữ từng dòng'];
+for (let i = 0; i < 4; i++) {
+  g.line([[cx, pr[i].b], [cx, pr[i + 1].y - 1]]);
+  g.text(cx + 10, (pr[i].b + pr[i + 1].y) / 2 + 5, flow[i], { fs: 15, halo: true });
+}
+const u = g.box(4, 22, 170, 66, ['Người dùng /', 'hệ thống nguồn'], { c: 'gray', fs: 15, title: false });
+g.line([[u.r, 56], [pr[0].x - 1, 56]], { label: 'tệp PDF', at: [211, 46], lfs: 15 });
+const dst = g.box(4, 404, 170, 60, 'Hệ thống đích', { c: 'gray', fs: 15 });
+g.line([[pr[4].x + 6, Y(4) - 8], [dst.r + 1, 434]]);
+g.text(89, 488, ['kết quả số hóa,', 'sự kiện hoàn thành'], { fs: 14, a: 'middle', lh: 17 });
+// Kho dữ liệu D1
+g.raw(`<rect x="660" y="14" width="216" height="532" fill="#fdf3d0" stroke="#b8921e" stroke-width="2"/><line x1="660" y1="62" x2="876" y2="62" stroke="#b8921e" stroke-width="2"/>`);
+g.text(768, 46, 'D1  MinIO data-lake', { fs: 16, a: 'middle', bold: true });
+['raw/', 'pic/', 'crop/', 'assets/', 'text/', 'preprocessed/', 'final/'].forEach((k, i) => g.text(680, 96 + i * 26, k, { fs: 15, mono: true }));
+const st = [['ảnh trang', 'w'], ['ảnh trang', 'r'], ['ảnh dòng, ảnh bảng/hình', 'w'], ['ảnh dòng', 'r'], ['văn bản, Markdown, JSON', 'w']];
+st.forEach(([t, dir], i) => {
+  const y = Y(i);
+  if (dir === 'w') g.line([[pr[i].r, y], [658, y]]); else g.line([[658, y], [pr[i].r + 1, y]]);
+  g.text(566, y - 9, t, { fs: 14, a: 'middle', halo: true });
+});
+g.render();
+</script></body></html>

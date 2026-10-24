@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 394);
+const bw = 160, gap = (880 - 8 - 5 * bw) / 4;
+const X = i => 4 + i * (bw + gap);
+const R1 = [['1. ListS3', 'liệt kê raw/'], ['2. FetchS3Object', 'tải tệp PDF'], ['3. UpdateAttribute', 'ten_pdf, path_chuan'], ['4. InvokeHTTP', 'POST /process'], ['5. UnpackContent', 'ZIP → ảnh PNG']];
+const b1 = R1.map((t, i) => g.box(X(i), 12, bw, 66, t, { c: i === 3 ? 'orange' : 'blue', fs: 15, sub: 14 }));
+for (let i = 0; i < 4; i++) g.line([[b1[i].r, 45], [b1[i + 1].x - 1, 45]]);
+const R2 = [['6. UpdateAttribute', 'khóa pic/raw/<id>/…'], ['7. PutS3Object', 'ghi ảnh trang'], ['8. ReplaceText', 'tạo JSON sự kiện'], ['9. PublishKafka', 'image-arrived']];
+const b2 = R2.map((t, i) => g.box(X(4 - i), 120, bw, 66, t, { c: 'blue', fs: 15, sub: 14 }));
+g.line([[b1[4].cx, b1[4].b], [b2[0].cx, b2[0].y - 1]]);
+for (let i = 0; i < 3; i++) g.line([[b2[i].x, 153], [b2[i + 1].r + 1, 153]]);
+// Nhánh xử lý lỗi
+g.box(4, 222, 872, 166, [], { c: 'red', rx: 10, fill: '#fff6f6' });
+g.text(20, 248, 'NHÁNH XỬ LÝ LỖI', { fs: 15, bold: true, color: '#c0504d' });
+g.text(20, 276, ['Quan hệ failure / Retry / No Retry', 'của các processor 2, 4, 7, 9: thử lại', '3 lần, chờ tăng dần (30 giây → 2 phút);', 'mã 422 (PDF hỏng) chuyển thẳng', 'sang nhánh lỗi.'], { fs: 14, lh: 19, color: '#333' });
+const e1 = g.box(340, 290, 160, 66, ['ReplaceText', 'dựng bản ghi lỗi'], { c: 'red', fs: 15, sub: 14 });
+const e2 = g.box(540, 290, 160, 66, ['PutS3Object', 'ghi errors/'], { c: 'red', fs: 15, sub: 14 });
+g.line([[296, 323], [e1.x - 1, 323]], { dash: true, color: '#c0504d' });
+g.line([[e1.r, 323], [e2.x - 1, 323]]);
+g.line([[e2.r, 323], [728, 323]]);
+g.text(734, 316, ['errors/<id>.json', '→ Web UI hiện "Lỗi"'], { fs: 14, lh: 19 });
+g.render();
+</script></body></html>

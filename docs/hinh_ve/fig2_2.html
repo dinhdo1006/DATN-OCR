@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 560);
+function actor(x, y, label) {
+  g.raw(`<g stroke="#222" stroke-width="2.2" fill="none"><circle cx="${x}" cy="${y - 34}" r="12" fill="#fff"/><line x1="${x}" y1="${y - 22}" x2="${x}" y2="${y + 10}"/><line x1="${x - 20}" y1="${y - 10}" x2="${x + 20}" y2="${y - 10}"/><line x1="${x}" y1="${y + 10}" x2="${x - 16}" y2="${y + 34}"/><line x1="${x}" y1="${y + 10}" x2="${x + 16}" y2="${y + 34}"/></g>`);
+  g.text(x, y + 56, [].concat(label), { fs: 15, a: 'middle', lh: 18 });
+  return { x, y };
+}
+g.raw(`<rect x="130" y="14" width="620" height="530" fill="#fff" stroke="#333" stroke-width="2"/>`);
+g.text(440, 40, 'Hệ thống OCR tài liệu tiếng Việt', { fs: 16, a: 'middle', bold: true });
+const U = (cx, cy, t) => g.ellipse(cx, cy, 118, 31, t, { c: 'yellow', fs: 15 });
+const u1 = U(262, 88, ['Xem danh sách và', 'trạng thái xử lý']);
+const u2 = U(262, 166, 'Xem kết quả số hóa');
+const u3 = U(262, 252, ['Tải xuống tệp kết quả', '(.md, .json, .txt)']);
+const u4 = U(262, 340, 'Tải lên tài liệu PDF');
+const s1 = U(262, 490, ['Gửi tài liệu', 'qua S3 API']);
+const a1 = U(618, 88, ['Cấu hình luồng', 'điều phối NiFi']);
+const a2 = U(618, 166, ['Giám sát dịch vụ,', 'nhật ký']);
+const a3 = U(618, 244, ['Quản lý lưu trữ', 'MinIO']);
+const d1 = U(618, 490, ['Nhận kết quả số hóa', '(sự kiện merge-completed)']);
+g.line([[262, u3.y], [262, u2.b + 1]], { dash: true, end: 'open' });
+g.text(270, 212, '«extend»', { fs: 14, halo: true });
+const pu = actor(55, 160, 'Người dùng'), pa = actor(825, 160, 'Quản trị viên');
+const ps = actor(55, 440, ['Hệ thống', 'nguồn']), pd = actor(825, 440, ['Hệ thống', 'đích']);
+const as = (p, q) => g.line([p, q], { end: 'none', sw: 1.6 });
+as([76, 150], [u1.x + 4, 96]); as([76, 156], [u2.x, 166]); as([76, 162], [u4.x + 8, 334]);
+as([804, 150], [a1.r - 4, 96]); as([804, 156], [a2.r, 166]); as([804, 162], [a3.r - 4, 238]);
+as([76, 440], [s1.x + 2, 490]); as([804, 440], [d1.r - 2, 490]);
+g.raw(`<path d="M404,300 h334 v78 l-14,14 h-320 z" fill="#fdf8e1" stroke="#b8921e" stroke-width="1.6"/><path d="M738,378 l-14,0 l0,14" fill="none" stroke="#b8921e" stroke-width="1.6"/>`);
+g.text(414, 322, ['Tài liệu vào raw/ được hệ thống tự động', 'số hóa (tiền xử lý → bố cục → cắt dòng →', 'nhận dạng → tái cấu trúc → ghép),', 'xem Hình 2-3 và Hình 2-5.'], { fs: 13.5, lh: 17 });
+g.line([[404, 342], [u4.r, 340]], { dash: true, end: 'none', sw: 1.4 });
+g.line([[430, 392], [s1.r - 24, 468]], { dash: true, end: 'none', sw: 1.4 });
+g.render();
+</script></body></html>

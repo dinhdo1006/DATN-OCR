@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 520);
+g.box(4, 4, 872, 512, [], { c: 'blue', dash: true, rx: 12, fill: '#fbfdff' });
+g.text(20, 30, 'Docker Compose – mạng ocr-network', { fs: 16, bold: true, color: '#2f5d8a' });
+const ui = g.box(24, 48, 210, 66, ['ocr-web-ui', 'FastAPI :8501'], { c: 'purple', fs: 16 });
+const nf = g.box(330, 48, 210, 66, ['nifi 1.25.0', 'HTTPS :8443'], { c: 'blue', fs: 16 });
+const pp = g.box(636, 48, 220, 66, ['preprocess', 'FastAPI :5000'], { c: 'blue', fs: 16 });
+g.line([[nf.r, 81], [pp.x - 2, 81]], { label: 'POST /process', at: [588, 70], lfs: 13 });
+const mi = g.box(24, 160, 832, 70, ['MinIO – bucket data-lake (:9000 S3, :9001 Console)', 'raw/ · pic/ · crop/ · assets/ · text/ · preprocessed/ · final/ · errors/'], { c: 'yellow', fs: 16, sub: 15 });
+g.line([[ui.cx, ui.b], [ui.cx, mi.y - 2]], { start: 'fill' });
+g.line([[nf.cx, nf.b], [nf.cx, mi.y - 2]], { start: 'fill' });
+const W = ['layout', 'paddleocr', 'vietocr', 'reconstruct', 'merge'], S = ['YOLO', 'DBNet', 'VGG-Transformer', 'gom dòng', 'ghép trang'];
+const ww = 152, gap = (832 - 5 * ww) / 4;
+const wk = W.map((n, i) => g.box(24 + i * (ww + gap), 290, ww, 70, [n + '-worker', S[i]], { c: 'green', fs: 15, sub: 14 }));
+wk.forEach(b => {
+  g.line([[b.cx, b.y], [b.cx, mi.b + 2]], { start: 'fill' });
+  g.line([[b.cx, b.b], [b.cx, 418]], { start: 'fill' });
+});
+g.text(30, 268, 'S3', { fs: 14, color: '#8a6d12', bold: true });
+g.text(30, 392, 'Kafka', { fs: 14, color: '#c0702a', bold: true });
+const kf = g.box(24, 420, 832, 70, ['Apache Kafka 3.7.0 (KRaft, :9092)', 'image-arrived → layout- → crop- → ocr- → document- → merge-completed'], { c: 'orange', fs: 16, sub: 15 });
+g.line([[nf.r - 25, nf.b], [nf.r - 25, 140], [866, 140], [866, 455], [kf.r + 2, 455]], { dash: true, label: 'PublishKafka (NiFi → image-arrived)', at: [730, 134], lfs: 14 });
+g.text(440, 508, 'Dữ liệu MinIO và Kafka lưu trên Docker volume ocr_minio_data, ocr_kafka_data', { fs: 14, a: 'middle', italic: true });
+g.render();
+</script></body></html>

@@ -2,7 +2,7 @@
 
 > **Đọc file này trước** khi agent / người mới tiếp tục dự án.  
 > Hướng dẫn chạy thường ngày nằm ở `README.txt`.  
-> **Cập nhật lần cuối:** 2026-10-23 (theo nhận xét GVHD: đối chứng Tesseract/PaddleOCR, đo hiệu năng lặp lại CPU/GPU, sửa OOM tiền xử lý, mở rộng ngang – mục 7b10).
+> **Cập nhật lần cuối:** 2026-10-24 (vẽ lại hình cho dễ đọc khi in, sửa bảng 2-1, mục 2.7, thêm bảng bộ tài liệu kiểm thử – mục 7b11; 23/10: đối chứng, hiệu năng CPU/GPU – 7b10).
 > **Workspace:** `d:\Đồ án công nghệ phần mềm\Thesis`
 
 ---
@@ -235,6 +235,14 @@ Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối ch�
 - Công cụ thêm: `tools/fetch_pages.py` (tải text từng trang để chấm lại), `tools/clean_bench.py` (xóa dữ liệu `bench_*` khỏi MinIO).
 - Web UI: chế độ Trình bày (render Markdown, ảnh bảng/hình qua `/api/assets`), tải `.md/.json/.txt` (`?fmt=`).
 - Báo cáo 86 trang: mục 3.6 (4 hình mới, chữ to), 3.9 viết lại (Bảng 3-6 CPU/GPU, năng lực 120 trang / 5 người, OOM, mở rộng), 3.10 thêm Bảng 3-8/3-9 đối chứng, TC16–TC19 (19 ca), Bảng 3-4 thêm 2 lỗi, Phụ lục 4 thêm lệnh GPU/scale/bench. Slide 26 trang: thay hình slide 7/10/12/17/22, thêm slide 20 (đối chứng) và 21 (hiệu năng).
+
+## 7b11. Rà soát hình, bảng trong báo cáo (24/10/2026)
+
+- Vẽ lại 16 hình cho chữ in ra ≥ 7 pt (hình rộng 880 px, chèn 439 pt): 1-1, 1-3, 1-4, 1-5, 2-1, 2-2, 2-4, 2-5, 2-6, 2-7, 2-8, 2-12, 2-13, 2-14, 2-15, 2-16; cắt gọn 3-5. Mã nguồn hình: `docs/hinh_ve/` (dg.js, seq.js, README.txt). Biểu đồ tuần tự 2-9..2-11 giữ nguyên (7–8 pt).
+- Sửa nội dung hình: 1-5 vẽ đúng topic crop-completed 2 partition + 2 bản sao vietocr; 2-7 PublishKafka xuất phát từ NiFi; 2-14 thêm `.md`, `errors/`; 2-16 có chế độ Trình bày/Văn bản và nút .md/.json/.txt.
+- Sửa chữ: Bảng 2-1 (độ chính xác theo số đo thật), mục 2.7 (cả 5 worker commit thủ công), Bảng 3-3 (CPU/GPU, từng trang), rút gọn ô TC18/TC19; thêm Bảng 3-7 "Bộ tài liệu kiểm thử" (đề cương = đề cương ĐATN của sinh viên; độc lập với dữ liệu huấn luyện; hạn chế: 14 trang). Các bảng chương 3 sau đó tự đánh lại số (3-8 trọng số, 3-9 đối chứng, 3-10 trích đoạn, 3-11 mục tiêu).
+- Lưu ý: worker PaddleOCR chạy `paddleocr_crop/crop_paddleocr.py` (group `ocr-crop-group`, commit thủ công); `paddleocr_crop/app.py` là bản cũ không dùng.
+- Báo cáo 87 trang, slide 26 trang (slide 7, 10, 12, 17 dùng hình mới).
 
 ## 7c. Lưu ý vận hành
 

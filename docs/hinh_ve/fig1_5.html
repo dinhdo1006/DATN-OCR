@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 345);
+const pr = g.box(15, 128, 150, 76, ['Producer', 'paddleocr-worker'], { c: 'blue', fs: 17 });
+g.box(205, 38, 420, 232, [], { c: 'white', dash: true, rx: 10, fill: '#fbfbfb' });
+g.text(415, 66, 'Topic crop-completed (Kafka, KRaft)', { fs: 17, a: 'middle', bold: true });
+const rows = [{ n: 'P0', y: 96 }, { n: 'P1', y: 176 }];
+for (const r of rows) {
+  g.text(226, r.y + 27, r.n, { fs: 17, bold: true });
+  for (let i = 0; i < 6; i++) g.box(262 + i * 52, r.y, 46, 42, String(i), { c: i < 4 ? 'green' : 'gray', fs: 17, rx: 4 });
+  g.text(580, r.y + 27, '…', { fs: 18 });
+}
+g.text(415, 254, 'offset tăng dần, lưu bền vững trên đĩa', { fs: 15, a: 'middle', italic: true });
+g.line([[pr.r, 166], [185, 166], [185, 117], [222, 117]]);
+g.text(185, 100, 'publish', { fs: 15, a: 'middle', halo: true });
+g.line([[185, 166], [185, 197], [222, 197]]);
+g.box(650, 62, 218, 200, [], { c: 'orange', dash: true, rx: 10, fill: '#fff8f1' });
+g.text(759, 88, 'Consumer group', { fs: 16, a: 'middle', bold: true });
+g.text(759, 108, 'vietocr-group', { fs: 16, a: 'middle' });
+const c1 = g.box(665, 124, 188, 50, 'vietocr-worker', { c: 'orange', fs: 16 });
+const c2 = g.box(665, 196, 188, 50, 'vietocr-worker-2', { c: 'orange', fs: 16 });
+g.line([[600, 117], [c1.x, 149]]);
+g.text(640, 182, 'poll, commit', { fs: 14, a: 'middle', halo: true });
+g.line([[600, 197], [c2.x, 221]]);
+g.text(440, 302, 'Trong một consumer group, mỗi partition chỉ giao cho một consumer; nhóm khác (ví dụ', { fs: 15, a: 'middle', italic: true });
+g.text(440, 324, 'reconstruct-group trên topic ocr-completed) đọc độc lập với offset riêng.', { fs: 15, a: 'middle', italic: true });
+g.render();
+</script></body></html>

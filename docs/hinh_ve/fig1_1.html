@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 404);
+const bw = 196, gap = (880 - 8 - 4 * bw) / 3, X = i => 4 + i * (bw + gap);
+const a = g.box(X(0), 10, bw, 72, ['Tài liệu PDF', '(bản quét / bản số)'], { c: 'gray', fs: 16, sub: 15 });
+const b = g.box(X(1), 10, bw, 72, ['Tiền xử lý', '300 DPI, ×1,2, ảnh xám'], { c: 'blue', fs: 16, sub: 15 });
+const c = g.box(X(2), 10, bw, 72, ['Phân tích bố cục', 'DocLayout-YOLO'], { c: 'green', fs: 16, sub: 15 });
+const d = g.box(X(3), 10, bw, 72, ['Phát hiện dòng chữ', 'DBNet (PaddleOCR)'], { c: 'green', fs: 16, sub: 15 });
+[[a, b], [b, c], [c, d]].forEach(([p, q]) => g.line([[p.r, 46], [q.x - 1, 46]]));
+const e = g.box(X(3), 198, bw, 72, ['Nhận dạng chữ', 'VietOCR (VGG-Transformer)'], { c: 'green', fs: 16, sub: 14 });
+g.line([[d.cx, d.b], [e.cx, e.y - 1]]);
+const f = g.box(X(2), 186, bw, 96, ['Tái cấu trúc', 'thứ tự đọc theo cột,', 'dựng bảng, ghép trang'], { c: 'orange', fs: 16, sub: 15 });
+g.line([[e.x, 234], [f.r + 1, 234]]);
+g.line([[c.cx, c.b], [c.cx, f.y - 1]], { dash: true, color: '#3c7a2e' });
+g.text(c.cx + 8, 104, ['tiêu đề · đoạn · danh sách ·', 'bảng · hình (bỏ đầu trang,', 'chân trang, số trang)'], { fs: 14, italic: true, color: '#333', lh: 17 });
+g.text(c.cx + 8, 172, 'dùng loại vùng + khung vùng', { fs: 14, bold: true, color: '#3c7a2e' });
+const r = g.box(4, 140, 410, 220, [], { c: 'yellow', rx: 8 });
+g.text(r.cx, 168, 'Kết quả có cấu trúc (MinIO final/)', { fs: 16, a: 'middle', bold: true });
+[['Markdown', 'tiêu đề (#), đoạn, danh sách, bảng'], ['JSON', 'loại vùng, tọa độ, thứ tự đọc'], ['assets/', 'ảnh gốc của từng bảng, hình'], ['TXT', 'văn bản thuần, giữ thụt lề']].forEach(([k, v], i) => {
+  g.text(20, 204 + i * 38, k, { fs: 15, bold: true });
+  g.text(118, 204 + i * 38, v, { fs: 15 });
+});
+g.line([[f.x, 234], [r.r + 1, 234]]);
+g.text(440, 394, 'Điều phối bất đồng bộ: Apache NiFi • Apache Kafka • MinIO • Docker Compose', { fs: 14, a: 'middle', italic: true, color: '#444' });
+g.render();
+</script></body></html>

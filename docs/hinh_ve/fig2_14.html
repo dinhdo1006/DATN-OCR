@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 345);
+g.box(4, 4, 872, 336, [], { c: 'white', rx: 8, fill: '#fafafa', stroke: '#bbb', sw: 1.5 });
+g.text(22, 38, 'data-lake/', { fs: 17, mono: true, bold: true });
+const rows = [
+  ['raw/<id>.pdf', 'PDF gốc tải lên'],
+  ['pic/raw/<id>/page_N.png', 'ảnh trang (NiFi)'],
+  ['crop/raw/<id>/page_N_crop_K.png', 'ảnh dòng chữ (PaddleOCR)'],
+  ['assets/raw/<id>/page_N_<loại>_K.png', 'ảnh bảng / hình gốc'],
+  ['text/raw/<id>/page_N.txt', 'văn bản từng trang'],
+  ['preprocessed/raw/<id>/page_N.json', 'JSON từng trang, có tọa độ'],
+  ['final/<id>/<id>.txt | .md | .json', 'kết quả cả tài liệu'],
+  ['errors/<id>.json', 'bản ghi lỗi (nhánh lỗi NiFi)']
+];
+rows.forEach((r, i) => {
+  const y = 74 + i * 34;
+  g.text(30, y, (i === rows.length - 1 ? '└─ ' : '├─ ') + r[0], { fs: 16, mono: true });
+  g.text(590, y, '← ' + r[1], { fs: 16 });
+});
+g.render();
+</script></body></html>

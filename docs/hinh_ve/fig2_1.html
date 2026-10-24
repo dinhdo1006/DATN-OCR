@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 390);
+const sys = g.ellipse(440, 195, 175, 62, ['HỆ THỐNG OCR', 'TÀI LIỆU TIẾNG VIỆT'], { c: 'blue', fs: 18, bold: true });
+g.raw(`<style>text{}</style>`);
+const u = g.box(10, 18, 210, 72, ['Người dùng', '(giao diện web)'], { c: 'gray', fs: 17 });
+const a = g.box(660, 18, 210, 72, ['Quản trị viên', '(NiFi, MinIO, Docker)'], { c: 'gray', fs: 17 });
+const s = g.box(10, 300, 210, 72, ['Hệ thống nguồn', '(ghi vào raw/)'], { c: 'gray', fs: 17 });
+const d = g.box(660, 300, 210, 72, ['Hệ thống đích', '(ERP, DMS)'], { c: 'gray', fs: 17 });
+g.line([[u.r, 62], [325, 145]], { label: 'tệp PDF', at: [300, 92], lfs: 16 });
+g.line([[282, 166], [u.cx + 20, u.b + 2]], { label: 'trạng thái, kết quả', at: [140, 146], lfs: 16 });
+g.line([[a.x, 70], [585, 150]], { label: 'cấu hình, giám sát', at: [620, 104], lfs: 16 });
+g.line([[s.r, 322], [318, 238]], { label: 'tệp PDF (S3 API)', at: [210, 262], lfs: 16 });
+g.line([[575, 238], [d.x, 322]], { label: 'Markdown/JSON/TXT,', at: [700, 252], lfs: 16 });
+g.text(700, 272, 'sự kiện merge-completed', { fs: 16, a: 'middle', halo: true });
+g.render();
+</script></body></html>

@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#fff}.t{display:inline-block;background:#0c0c0c;border-radius:8px;padding:0 0 14px;font:19px/1.45 Consolas,"Courier New",monospace;color:#cccccc}.bar{background:#2b2b2b;color:#ddd;font:15px Arial,sans-serif;padding:7px 14px;border-radius:8px 8px 0 0}pre{margin:10px 18px 0 18px;padding-right:18px;font:inherit;white-space:pre}.c{color:#f9f1a5}.h{color:#fff;font-weight:700}.u{color:#16c60c}</style></head><body><div class="t"><div class="bar">Windows PowerShell</div><pre>PS ...\OCR_pipeline&gt; <span class="c">docker compose ps --format "table {{.Name}}\t{{.Image}}\t{{.Status}}"</span>
+<span class="h">NAME                 IMAGE                                      STATUS</span>
+kafka                apache/kafka:3.7.0                         <span class="u">Up 11 hours (healthy)</span>
+layout-worker        layout-worker-cpu                          <span class="u">Up 2 hours</span>
+merge-worker         merge-worker-local                         <span class="u">Up 11 hours</span>
+minio                pgsty/minio:RELEASE.2026-08-04T00-00-00Z   <span class="u">Up 11 hours</span>
+nifi                 apache/nifi:1.25.0                         <span class="u">Up 11 hours</span>
+ocr-web-ui           ocr-web-ui-local                           <span class="u">Up 11 hours</span>
+paddleocr-worker     paddleocr-crop-local                       <span class="u">Up About an hour</span>
+preprocess           preprocess-local                           <span class="u">Up 9 hours</span>
+reconstruct-worker   reconstruct-worker-local                   <span class="u">Up 11 hours</span>
+vietocr-worker       vietocr-worker-cpu                         <span class="u">Up About an hour</span>
+</pre></div></body></html>

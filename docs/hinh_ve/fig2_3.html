@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#fff}
+svg{display:block;font-family:Arial,"Segoe UI",sans-serif}
+.box{fill:#e3f1df;stroke:#5aa04a;stroke-width:2}
+.root{fill:#fbe5d0;stroke:#d08a3a;stroke-width:2.5}
+.t{font-size:21px;fill:#111;font-weight:700}
+.c{font-size:19px;fill:#1f4e79;font-family:Consolas,"Courier New",monospace}
+.k{font-size:18px;fill:#444;font-style:italic}
+.ln{stroke:#333;stroke-width:2;fill:none}
+.h{font-size:16px;fill:#666;font-weight:700}
+</style></head><body>
+<svg width="930" height="520" viewBox="0 0 930 520" xmlns="http://www.w3.org/2000/svg">
+<rect class="root" x="20" y="16" width="430" height="64" rx="10"/>
+<text class="t" x="40" y="45" style="font-size:22px">Số hóa tài liệu tự động</text>
+<text class="k" x="40" y="69">kích hoạt khi có tệp PDF mới trong raw/</text>
+
+<text class="h" x="500" y="112">DỊCH VỤ</text><text class="h" x="728" y="112">SỰ KIỆN KÍCH HOẠT</text>
+<line class="ln" x1="50" y1="80" x2="50" y2="460"/>
+
+<g>
+<line class="ln" x1="50" y1="150" x2="80" y2="150"/>
+<rect class="box" x="80" y="124" width="830" height="52" rx="8"/>
+<text class="t" x="98" y="157">1. Tiền xử lý PDF thành ảnh</text><text class="c" x="500" y="157">preprocess</text><text class="k" x="728" y="157">NiFi gọi HTTP</text>
+
+<line class="ln" x1="50" y1="212" x2="80" y2="212"/>
+<rect class="box" x="80" y="186" width="830" height="52" rx="8"/>
+<text class="t" x="98" y="219">2. Phân tích bố cục trang</text><text class="c" x="500" y="219">layout-worker</text><text class="k" x="728" y="219">image-arrived</text>
+
+<line class="ln" x1="50" y1="274" x2="80" y2="274"/>
+<rect class="box" x="80" y="248" width="830" height="52" rx="8"/>
+<text class="t" x="98" y="281">3. Cắt dòng chữ, tách hình/bảng</text><text class="c" x="500" y="281">paddleocr-worker</text><text class="k" x="728" y="281">layout-completed</text>
+
+<line class="ln" x1="50" y1="336" x2="80" y2="336"/>
+<rect class="box" x="80" y="310" width="830" height="52" rx="8"/>
+<text class="t" x="98" y="343">4. Nhận dạng chữ tiếng Việt</text><text class="c" x="500" y="343">vietocr-worker</text><text class="k" x="728" y="343">crop-completed</text>
+
+<line class="ln" x1="50" y1="398" x2="80" y2="398"/>
+<rect class="box" x="80" y="372" width="830" height="52" rx="8"/>
+<text class="t" x="98" y="405">5. Tái cấu trúc từng trang</text><text class="c" x="500" y="405">reconstruct-worker</text><text class="k" x="728" y="405">ocr-completed</text>
+
+<line class="ln" x1="50" y1="460" x2="80" y2="460"/>
+<rect class="box" x="80" y="434" width="830" height="52" rx="8"/>
+<text class="t" x="98" y="467">6. Ghép tài liệu nhiều trang</text><text class="c" x="500" y="467">merge-worker</text><text class="k" x="728" y="467">document-completed</text>
+</g>
+<text x="80" y="510" style="font-size:17px;fill:#444">Đầu ra: final/&lt;id&gt;/ (.md, .json, .txt) và sự kiện merge-completed cho hệ thống đích.</text>
+</svg>
+</body></html>

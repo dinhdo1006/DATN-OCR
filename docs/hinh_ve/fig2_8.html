@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 640);
+// Lớp UML: tên / thuộc tính / phương thức
+function cls(x, y, w, name, attrs, ops, c, stereo) {
+  const [fill, stroke] = PAL[c], lh = 20, hh = stereo ? 46 : 32;
+  const h = hh + attrs.length * lh + 10 + ops.length * lh + 10;
+  g.raw(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="${stroke}" stroke-width="2"/>`);
+  g.raw(`<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`);
+  if (stereo) g.text(x + w / 2, y + 18, '«interface»', { fs: 14, a: 'middle' });
+  g.text(x + w / 2, y + hh - 10, name, { fs: 16, a: 'middle', bold: true });
+  let yy = y + hh + 18;
+  attrs.forEach(a => { g.text(x + 8, yy, a, { fs: 14, mono: true }); yy += lh; });
+  g.raw(`<line x1="${x}" y1="${yy - 10}" x2="${x + w}" y2="${yy - 10}" stroke="${stroke}" stroke-width="1.5"/>`);
+  yy += 6;
+  ops.forEach(o => { g.text(x + 8, yy, o, { fs: 14, mono: true }); yy += lh; });
+  return { x, y, w, h, cx: x + w / 2, cy: y + h / 2, r: x + w, b: y + h };
+}
+const W = 278, X = [6, 301, 596];
+const lw = cls(X[0], 6, W, 'LayoutWorker', ['model: YOLO', 'NAME_MAP: dict', 'DEVICE: cpu | cuda'], ['detect_layout(img)', 'run()'], 'blue');
+const pw = cls(X[1], 6, W, 'PaddleCropWorker', ['ocr: PaddleOCR', 'rec = False'], ['normalize_box(box)', 'get_rotate_crop_image()', 'run()'], 'blue');
+const vw = cls(X[2], 6, W, 'VietOCRWorker', ['BATCH_SIZE = 4 (GPU: 16)', 'detector: Predictor', 'DEVICE: cpu | cuda'], ['get_image(key, retries)', 'predict(images)'], 'blue');
+const rw = cls(X[0], 222, W, 'ReconstructWorker', ['document_buffer: dict', 'TIMEOUT = 120'], ['sort_boxes(boxes)', 'group_lines(boxes)', 'build_text(lines)', 'build_json(img, lines)'], 'blue');
+const kc = cls(X[1], 238, W, 'KafkaClient', ['bootstrap_servers', 'group_id'], ['poll() / send()', 'commit(offsets)'], 'orange', true);
+const mw = cls(X[2], 222, W, 'MergeWorker', ['document_buffer: dict', 'TIMEOUT = 180', 'EVICT_AFTER = 3600'], ['natural_key(name)', 'merge_document()', 'maybe_flush()'], 'blue');
+const ps = cls(X[0], 470, W, 'PreprocessService', ['UPLOAD_DIR'], ['POST /process', 'process_scan_pdf()'], 'purple');
+const s3 = cls(X[1], 456, W, 'S3Client', ['endpoint_url', 'bucket'], ['get_object() / put_object()', 'list_objects_v2()'], 'yellow', true);
+const wu = cls(X[2], 456, W, 'WebUIService', ['MAX_UPLOAD_MB = 100'], ['POST /api/upload', 'GET /api/documents', 'GET /api/assets'], 'purple');
+const dep = (a, b) => g.line([a, b], { dash: true, end: 'open', sw: 1.6 });
+dep([lw.cx, lw.b], [kc.x + 40, kc.y]);
+dep([pw.cx, pw.b], [kc.cx, kc.y]);
+dep([vw.cx, vw.b], [kc.r - 40, kc.y]);
+dep([rw.r, rw.y + 70], [kc.x, kc.y + 50]);
+dep([mw.x, mw.y + 70], [kc.r, kc.y + 50]);
+dep([rw.r, rw.b - 30], [s3.x + 30, s3.y]);
+dep([mw.x, mw.b - 30], [s3.r - 30, s3.y]);
+dep([wu.x, wu.y + 60], [s3.r, s3.y + 60]);
+g.text(440, 634, 'Mũi tên nét đứt: phụ thuộc vào giao diện dùng chung; các worker còn đọc, ghi MinIO qua S3Client', { fs: 14, a: 'middle', italic: true });
+g.render();
+</script></body></html>

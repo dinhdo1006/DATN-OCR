@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 560);
+const x = 150, w = 230, h = 64;
+const S = (y, t, c) => g.box(x, y, w, h, t, { c, fs: 17, sub: 15, rx: 14 });
+g.raw(`<circle cx="${x + w / 2}" cy="20" r="11" fill="#111"/>`);
+const q = S(50, ['queued', 'có raw/<id>.pdf'], 'green');
+const l = S(170, ['layout', 'có ảnh trong pic/'], 'green');
+const o = S(290, ['ocr', 'có trang trong text/'], 'green');
+const d = S(410, ['done', 'final/, success'], 'green');
+g.line([[q.cx, 31], [q.cx, q.y - 1]]);
+g.line([[q.cx, q.b], [l.cx, l.y - 1]], { label: 'tách trang', at: [q.cx + 12, 142], la: 'start', lfs: 15 });
+g.line([[l.cx, l.b], [o.cx, o.y - 1]], { label: 'trang đầu xong', at: [l.cx + 12, 262], la: 'start', lfs: 15 });
+g.line([[o.cx, o.b], [d.cx, d.y - 1]], { label: 'đủ trang', at: [o.cx + 12, 382], la: 'start', lfs: 15 });
+g.line([[d.cx, d.b], [d.cx, 504]]);
+g.raw(`<circle cx="${d.cx}" cy="518" r="12" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="${d.cx}" cy="518" r="7" fill="#111"/>`);
+const e = g.box(600, 50, 250, h, ['error', 'có errors/<id>.json'], { c: 'red', fs: 17, sub: 15, rx: 14 });
+g.line([[q.r, 82], [e.x - 1, 82]]);
+g.text((q.r + e.x) / 2, 66, 'PDF hỏng hoặc', { fs: 15, a: 'middle' });
+g.text((q.r + e.x) / 2, 106, 'tiền xử lý lỗi', { fs: 15, a: 'middle' });
+g.line([[e.cx, e.b], [e.cx, 150]]);
+g.raw(`<circle cx="${e.cx}" cy="164" r="12" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="${e.cx}" cy="164" r="7" fill="#111"/>`);
+const p = g.box(600, 290, 250, h, ['partial', 'final/, còn trang thiếu box'], { c: 'yellow', fs: 17, sub: 15, rx: 14 });
+g.line([[o.r, 322], [p.x - 1, 322]]);
+g.text((o.r + p.x) / 2, 306, 'hết thời gian chờ,', { fs: 15, a: 'middle' });
+g.text((o.r + p.x) / 2, 346, 'ghép tạm', { fs: 15, a: 'middle' });
+g.line([[p.cx, p.b], [p.cx, 442], [d.r + 1, 442]]);
+g.text(p.cx + 10, 400, ['box đến muộn,', 'ghép lại'], { fs: 15, lh: 18 });
+g.text(440, 550, 'Trạng thái suy ra từ đối tượng có trên MinIO (hàm doc_status của web_ui), không lưu trong cơ sở dữ liệu', { fs: 14, a: 'middle', italic: true });
+g.render();
+</script></body></html>

@@ -1,0 +1,28 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 330);
+// (a) box theo thứ tự đến từ VietOCR (lộn xộn), (b) sau khi sắp (y, x) và gom dòng
+g.box(4, 30, 380, 230, [], { c: 'white', rx: 6, stroke: '#999', sw: 1.5 });
+g.text(194, 22, '(a) Box sau nhận dạng, chưa có thứ tự', { fs: 15, a: 'middle', bold: true });
+const A = [
+  ['#2', 'Điều 1.', 18, 52, 96], ['#0', 'Phạm vi áp dụng', 126, 52, 230],
+  ['#5', 'Văn bản này', 18, 122, 150], ['#3', 'quy định về', 182, 128, 170],
+  ['#1', 'việc số hóa', 18, 192, 150], ['#4', 'tài liệu nội bộ.', 182, 186, 180]
+];
+A.forEach(([id, t, x, y, w]) => { g.box(x, y, w, 44, t, { c: 'blue', fs: 16 }); g.text(x + 2, y - 4, id, { fs: 13, color: '#c0504d', bold: true }); });
+g.line([[392, 145], [478, 145]], { sw: 2.5 });
+g.text(435, 128, 'sắp (y, x)', { fs: 14, a: 'middle' });
+g.text(435, 172, ['lệch tâm', '< 0,5 × h̄'], { fs: 14, a: 'middle', lh: 18 });
+g.box(486, 30, 390, 230, [], { c: 'white', rx: 6, stroke: '#999', sw: 1.5 });
+g.text(681, 22, '(b) Gom thành dòng, sắp theo x', { fs: 15, a: 'middle', bold: true });
+const B = [
+  ['Điều 1.', 500, 52, 96, 'orange'], ['Phạm vi áp dụng', 606, 52, 210, 'orange'],
+  ['Văn bản này', 500, 125, 150, 'green'], ['quy định về', 660, 125, 156, 'green'],
+  ['việc số hóa', 500, 192, 150, 'purple'], ['tài liệu nội bộ.', 660, 192, 170, 'purple']
+];
+B.forEach(([t, x, y, w, c]) => g.box(x, y, w, 44, t, { c, fs: 16 }));
+['L0', 'L1', 'L2'].forEach((l, i) => g.text(848, [80, 153, 220][i], l, { fs: 15, bold: true }));
+g.text(440, 292, 'Kết quả: "Điều 1. Phạm vi áp dụng" / "Văn bản này quy định về" / "việc số hóa tài liệu nội bộ."', { fs: 15, a: 'middle', italic: true });
+g.text(440, 316, 'Dòng chữ trong bảng được gom theo hàng rồi xếp vào cột của bảng Markdown', { fs: 14, a: 'middle', color: '#555' });
+g.render();
+</script></body></html>

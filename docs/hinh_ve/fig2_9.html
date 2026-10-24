@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="seq.js"></script></head><body style="background:#fff">
+<script>
+drawSeq({
+  width: 1100,
+  participants: ["NiFi", "MinIO", "Preprocess", "Kafka", "layout-worker"],
+  steps: [
+    { f: "NiFi", t: "MinIO", l: "ListS3(raw/)", k: "sync" },
+    { f: "MinIO", t: "NiFi", l: "raw/<id>.pdf mới", k: "ret" },
+    { f: "NiFi", t: "MinIO", l: "FetchS3Object", k: "sync" },
+    { f: "MinIO", t: "NiFi", l: "nội dung PDF", k: "ret" },
+    { f: "NiFi", t: "Preprocess", l: "POST /process (PDF)", k: "sync" },
+    { f: "Preprocess", t: "Preprocess", l: "PDF → ảnh 300 DPI", k: "self" },
+    { f: "Preprocess", t: "NiFi", l: "ZIP ảnh + X-Total-Pages", k: "ret" },
+    { frag: "loop", cond: "mỗi trang", over: ["NiFi", "Kafka"] },
+    { f: "NiFi", t: "MinIO", l: "PutS3Object page_N.png", k: "sync" },
+    { f: "NiFi", t: "Kafka", l: "publish image-arrived", k: "async" },
+    { end: true },
+    { frag: "loop", cond: "mỗi sự kiện image-arrived", over: ["MinIO", "layout-worker"] },
+    { f: "layout-worker", t: "Kafka", l: "poll()", k: "sync" },
+    { f: "Kafka", t: "layout-worker", l: "image-arrived {page}", k: "ret" },
+    { f: "layout-worker", t: "MinIO", l: "get_object(page_N.png)", k: "sync" },
+    { f: "MinIO", t: "layout-worker", l: "ảnh trang", k: "ret" },
+    { f: "layout-worker", t: "layout-worker", l: "YOLO phát hiện vùng", k: "self" },
+    { f: "layout-worker", t: "Kafka", l: "publish layout-completed", k: "async" },
+    { f: "layout-worker", t: "Kafka", l: "commit offset", k: "sync" },
+    { end: true }
+  ],
+  acts: [["Preprocess", 4, 6]]
+});
+</script></body></html>

@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 270);
+const a = g.box(8, 92, 136, 76, ['Vùng văn bản', '(từ YOLO)'], { c: 'gray', fs: 17 });
+const b = g.box(184, 92, 136, 76, ['Backbone', '+ FPN'], { c: 'blue', fs: 17 });
+const p = g.box(362, 18, 150, 76, ['Bản đồ', 'xác suất P'], { c: 'green', fs: 17, title: false });
+const t = g.box(362, 166, 150, 76, ['Bản đồ', 'ngưỡng T'], { c: 'green', fs: 17, title: false });
+const n = g.box(556, 92, 158, 76, ['Nhị phân hóa', 'khả vi B̂'], { c: 'orange', fs: 17, title: false });
+const o = g.box(752, 92, 122, 76, ['Đa giác', 'dòng chữ'], { c: 'purple', fs: 17, title: false });
+g.line([[a.r, 130], [b.x - 2, 130]]);
+g.line([[b.r, 130], [340, 130], [340, 56], [p.x - 2, 56]]);
+g.line([[340, 130], [340, 204], [t.x - 2, 204]]);
+g.line([[p.r, 56], [534, 56], [534, 120], [n.x - 2, 120]]);
+g.line([[t.r, 204], [534, 204], [534, 140], [n.x - 2, 140]]);
+g.line([[n.r, 130], [o.x - 2, 130]]);
+g.text(635, 225, 'B̂ = 1 / (1 + e^(−k(P − T)))', { fs: 17, a: 'middle', italic: true });
+g.render();
+</script></body></html>

@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 400);
+const L = [
+  { n: ['Giao diện &', 'tiếp nhận'], c: 'purple', items: [['web_ui', '(FastAPI, :8501)'], ['Hệ thống nguồn', '(S3 API)']] },
+  { n: ['Điều phối'], c: 'blue', items: [['Apache NiFi', '(11 processor)'], ['Preprocess', '(FastAPI, :5000)']] },
+  { n: ['Thông điệp'], c: 'orange', items: [['Apache Kafka – 6 topic']] },
+  { n: ['AI worker'], c: 'green', items: [['layout'], ['paddleocr'], ['vietocr'], ['reconstruct'], ['merge']] },
+  { n: ['Lưu trữ'], c: 'yellow', items: [['MinIO data-lake'], ['Docker volume']] }
+];
+const x0 = 6, w = 800, h = 66, gap = 12, lw = 140;
+L.forEach((l, i) => {
+  const y = 8 + i * (h + gap);
+  g.box(x0, y, w, h, [], { c: l.c, rx: 8 });
+  g.text(x0 + 14, y + h / 2 + 6 - (l.n.length - 1) * 10, l.n, { fs: 16, bold: true, lh: 20 });
+  const n = l.items.length, iw = (w - lw - 14 - (n - 1) * 8) / n;
+  l.items.forEach((it, k) => g.box(x0 + lw + k * (iw + 8), y + 9, iw, h - 18, it, { c: 'white', fs: 16, title: false, stroke: PAL[l.c][1] }));
+  if (i < L.length - 1) g.line([[x0 + w + 36, y + 20], [x0 + w + 36, y + h + gap + 20]]);
+});
+g.raw(`<text x="866" y="200" font-size="15" fill="#333" text-anchor="middle" transform="rotate(90 866 200)">phụ thuộc một chiều</text>`);
+g.render();
+</script></body></html>

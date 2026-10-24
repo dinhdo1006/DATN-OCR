@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="seq.js"></script></head><body style="background:#fff">
+<script>
+drawSeq({
+  width: 1100,
+  row: 44,
+  participants: ["Người dùng", "Trình duyệt", "web_ui", "MinIO", "Luồng\nxử lý"],
+  steps: [
+    { f: "Người dùng", t: "Trình duyệt", l: "chọn tệp PDF", k: "sync" },
+    { f: "Trình duyệt", t: "web_ui", l: "POST /api/upload", k: "sync" },
+    { f: "web_ui", t: "MinIO", l: "put raw/<id>.pdf", k: "sync" },
+    { f: "web_ui", t: "Trình duyệt", l: "{id, size}", k: "ret" },
+    { f: "Luồng\nxử lý", t: "MinIO", l: "ListS3 nhặt tệp mới", k: "sync" },
+    { frag: "loop", cond: "mỗi 4 giây, đến khi done", over: ["Trình duyệt", "MinIO"] },
+    { f: "Trình duyệt", t: "web_ui", l: "GET /api/documents", k: "sync" },
+    { f: "web_ui", t: "MinIO", l: "liệt kê pic/, text/, final/", k: "sync" },
+    { f: "web_ui", t: "Trình duyệt", l: "[{id, status, tiến độ}]", k: "ret" },
+    { end: true },
+    { f: "Luồng\nxử lý", t: "MinIO", l: "put final/<id>/", k: "sync" },
+    { f: "Trình duyệt", t: "web_ui", l: "GET /api/documents/{id}", k: "sync" },
+    { f: "web_ui", t: "MinIO", l: "đọc .md, .txt", k: "sync" },
+    { f: "web_ui", t: "Trình duyệt", l: "{done, markdown, text}", k: "ret" },
+    { f: "Trình duyệt", t: "Người dùng", l: "tiêu đề, bảng, ảnh bảng", k: "ret" },
+    { frag: "opt", cond: "người dùng tải tệp", over: ["Người dùng", "MinIO"] },
+    { f: "Người dùng", t: "Trình duyệt", l: "chọn .md / .json / .txt", k: "sync" },
+    { f: "Trình duyệt", t: "web_ui", l: "GET …/download?fmt=", k: "sync" },
+    { f: "web_ui", t: "Trình duyệt", l: "tệp kết quả", k: "ret" },
+    { end: true }
+  ]
+});
+</script></body></html>
