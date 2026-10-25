@@ -250,6 +250,15 @@ Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối ch�
 - CPU, 10 container, NiFi 11/11 Running: 2 trang xong sau 58 s và 59 s (lần 2 tên `bench_demo_2trang`, Markdown giống hệt trừ tên); `pdf_hong` báo lỗi HTTP 422 sau 2 s. Đã xóa dữ liệu `bench_*` bằng `tools/clean_bench.py --xoa`; giữ `demo_decuong_2trang` trong MinIO để làm kết quả có sẵn.
 - Báo cáo: Tóm tắt, Bảng 3-11 (mục tiêu) và Kết luận đổi CER tài liệu có bảng từ 5,44% sang 4,95% cho khớp Bảng 3-9 (số đo sau cùng 19/10); Bảng 3-8 và các đoạn kể lần đo trước giữ 5,44%. Slide 18 đổi tương tự; slide 7, 19 (so sánh trọng số) giữ 5,44%. Báo cáo 85 trang.
 
+## 7b13. Rà soát lại toàn bộ hình theo mã nguồn và quy tắc UML/DFD (25/10/2026)
+
+- Hình 2-4 (DFD mức 0) vẽ lại cho cân bằng với Hình 2-1: thêm tiến trình 6.0 Tra cứu kết quả (trả trạng thái, kết quả cho Người dùng), tách tác nhân Hệ thống nguồn và Quản trị viên, thêm luồng 3.0 → 5.0 (hình, bảng, trang rỗng), thêm errors/ vào D1.
+- Hình 2-5 (hoạt động): thêm nút quyết định "loại vùng?" có điều kiện [dòng chữ] / [hình, bảng, trang rỗng], nút hợp nhánh trước Gom box, nhánh [PDF hỏng] → errors/ → trạng thái Lỗi.
+- Hình 2-6 (phân tầng): 4 tầng, Kafka và MinIO cùng ở tầng hạ tầng dưới cùng (trước đặt Kafka trên tầng AI worker, mâu thuẫn "phụ thuộc một chiều"); bỏ "Hệ thống nguồn" khỏi các tầng.
+- Hình 2-16: ô tải lên nằm ngang phía trên như giao diện thật; Hình 1-2 vẽ lại (YOLO chạy cạnh dài 1024 theo imgsz của checkpoint, không phải 1024×1024); sửa nhãn đè ở 1-5, 2-15; 2-10 thêm trả về "ảnh dòng"; 3-1 không còn cắt dòng lệnh; 3-3 cắt bớt.
+- Chữ báo cáo sửa theo hình (2.3.5, 2.3.6, 2.4.2, 2.10, kết chương 2); thêm đoạn giải thích Hình 2-10 sau Hình 2-9; khoảng cách trước dòng mục lục 3 → 2 pt (hết tràn 3 dòng sang trang iv). Báo cáo 83 trang; Word để trang 16 trắng nên MỞ ĐẦU vẫn ở trang 17 (trang lẻ) như trước, dù các ngắt mục đều là "trang mới" (chưa rõ cơ chế).
+- Slide: 11 thay Hình 2-7 bản đã sửa (bản cũ vẽ PublishKafka từ preprocess), 12 thay Hình 2-4 mới và phóng to, 13 thay Hình 2-15 mới.
+
 ## 7c. Lưu ý vận hành
 
 - Docker Desktop dùng chung ~8 GB RAM với CVAT/nuclio. Khi quá tải engine có thể treo (`docker stop` không phản hồi); cách gỡ: restart máy, rồi dừng CVAT trước khi chạy OCR nặng.

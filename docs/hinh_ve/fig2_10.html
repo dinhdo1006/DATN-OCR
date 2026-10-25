@@ -17,6 +17,7 @@ drawSeq({
     { f: "vietocr-\nworker", t: "Kafka", l: "poll(≤ 4)", k: "sync" },
     { f: "Kafka", t: "vietocr-\nworker", l: "crop-completed", k: "ret" },
     { f: "vietocr-\nworker", t: "MinIO", l: "get_object(crop)", k: "sync" },
+    { f: "MinIO", t: "vietocr-\nworker", l: "ảnh dòng", k: "ret" },
     { f: "vietocr-\nworker", t: "vietocr-\nworker", l: "predict_batch", k: "self" },
     { f: "vietocr-\nworker", t: "Kafka", l: "ocr-completed {text}", k: "async" },
     { end: true },
@@ -30,7 +31,7 @@ drawSeq({
     { frag: "loop", cond: "mỗi trang, đến khi đủ total_pages", over: ["Kafka", "MinIO"] },
     { f: "merge-\nworker", t: "Kafka", l: "poll()", k: "sync" },
     { f: "Kafka", t: "merge-\nworker", l: "document-completed", k: "ret" },
-    { f: "merge-\nworker", t: "MinIO", l: "put final/<id>/ .md .json .txt", k: "sync" },
+    { f: "merge-\nworker", t: "MinIO", l: "put final/<id>/", k: "sync" },
     { f: "merge-\nworker", t: "Kafka", l: "merge-completed", k: "async" },
     { end: true }
   ]

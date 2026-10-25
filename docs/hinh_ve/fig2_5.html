@@ -1,55 +1,75 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 896);
+const g = new Dg(880, 1100);
 const lanes = [['Người dùng /', 'Web UI'], ['NiFi +', 'Preprocess'], ['Layout +', 'PaddleOCR'], ['VietOCR'], ['Reconstruct', '+ Merge']];
 const LW = 176, cx = i => i * LW + LW / 2;
 lanes.forEach((l, i) => {
-  g.raw(`<rect x="${i * LW + 1}" y="1" width="${LW - 2}" height="892" fill="${i % 2 ? '#fafafa' : '#fff'}" stroke="#bbb" stroke-width="1.5"/>`);
+  g.raw(`<rect x="${i * LW + 1}" y="1" width="${LW - 2}" height="1096" fill="${i % 2 ? '#fafafa' : '#fff'}" stroke="#bbb" stroke-width="1.5"/>`);
   g.raw(`<rect x="${i * LW + 1}" y="1" width="${LW - 2}" height="54" fill="#e8e8e8" stroke="#bbb" stroke-width="1.5"/>`);
   g.text(cx(i), l.length > 1 ? 24 : 34, l, { fs: 15, a: 'middle', bold: true, lh: 19 });
 });
-const N = (i, y, t, h = 54) => g.box(cx(i) - 74, y, 148, h, t, { c: 'yellow', fs: 14, title: false, lh: 17 });
-// làn 0
-g.raw(`<circle cx="${cx(0)}" cy="80" r="10" fill="#111"/>`);
-const n1 = N(0, 104, ['Chọn, tải', 'lên PDF']);
-g.line([[cx(0), 90], [cx(0), n1.y - 2]]);
-const dy = 214;
-g.raw(`<path d="M${cx(0)},${dy - 26} l26,26 l-26,26 l-26,-26 z" fill="#fff" stroke="#333" stroke-width="2"/>`);
-g.line([[cx(0), n1.b], [cx(0), dy - 28]]);
-g.text(cx(0) + 32, dy - 8, 'hợp lệ?', { fs: 14 });
-g.line([[cx(0) - 26, dy], [26, dy], [26, 262]]);
-g.text(24, dy - 8, 'không', { fs: 14 });
-g.raw(`<circle cx="26" cy="274" r="11" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="26" cy="274" r="6" fill="#111"/>`);
-g.text(6, 304, 'lỗi 400/413', { fs: 14 });
-const n2 = N(0, 330, ['Lưu', 'raw/<id>.pdf']);
-g.line([[cx(0), dy + 26], [cx(0), n2.y - 2]]);
-g.text(cx(0) + 6, dy + 46, 'có', { fs: 14 });
-// làn 1
-const n3 = N(1, 330, ['ListS3 phát hiện,', 'Fetch tệp']);
+const N = (i, y, t, h = 48) => g.box(cx(i) - 74, y, 148, h, t, { c: 'yellow', fs: 14, title: false, lh: 17 });
+// Nút quyết định / hợp nhánh (hình thoi), trả về các đỉnh
+const D = (x, y) => { g.raw(`<path d="M${x},${y - 26} l26,26 l-26,26 l-26,-26 z" fill="#fff" stroke="#333" stroke-width="2"/>`); return { x, y, t: y - 26, b: y + 26, l: x - 26, r: x + 26 }; };
+const fin = (x, y) => g.raw(`<circle cx="${x}" cy="${y}" r="12" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="${x}" cy="${y}" r="7" fill="#111"/>`);
+const guard = (x, y, t, a = 'middle') => g.text(x, y, t, { fs: 13, a, halo: true, color: '#333' });
+// Làn 0: tải lên và kiểm tra đầu vào
+g.raw(`<circle cx="${cx(0)}" cy="76" r="10" fill="#111"/>`);
+const n1 = N(0, 100, ['Chọn, tải', 'lên PDF']);
+g.line([[cx(0), 86], [cx(0), n1.y - 2]]);
+const d1 = D(cx(0), 196);
+g.line([[cx(0), n1.b], [cx(0), d1.t - 2]]);
+g.text(d1.r + 6, 188, 'hợp lệ?', { fs: 14 });
+g.line([[d1.l, 196], [26, 196], [26, 244]]);
+guard(6, 188, '[không]', 'start');
+fin(26, 258);
+g.text(6, 290, 'lỗi 400/413', { fs: 14 });
+const n2 = N(0, 318, ['Lưu', 'raw/<id>.pdf']);
+g.line([[cx(0), d1.b], [cx(0), n2.y - 2]]);
+guard(cx(0) + 6, 250, '[có]', 'start');
+// Làn 1: NiFi tiếp nhận, gọi tiền xử lý
+const n3 = N(1, 318, ['ListS3 phát hiện,', 'Fetch tệp']);
 g.line([[n2.r, n2.cy], [n3.x - 2, n3.cy]]);
-const n4 = N(1, 416, ['POST /process:', 'PDF → PNG', 'từng trang'], 64);
+const n4 = N(1, 396, ['POST /process:', 'PDF → PNG', 'từng trang'], 60);
 g.line([[cx(1), n3.b], [cx(1), n4.y - 2]]);
-const n5 = N(1, 512, ['Lưu page_N.png,', 'gửi image-arrived']);
-g.line([[cx(1), n4.b], [cx(1), n5.y - 2]]);
-// làn 2
-const n6 = N(2, 512, ['YOLO phát hiện', 'vùng bố cục']);
+const d2 = D(cx(1), 500);
+g.line([[cx(1), n4.b], [cx(1), d2.t - 2]]);
+// PDF hỏng: NiFi ghi errors/<id>.json, giao diện hiện trạng thái Lỗi
+const nE = N(0, 476, ['Thấy "Lỗi" + lý do', '(errors/<id>.json)']);
+g.line([[d2.l, 500], [nE.r + 2, 500]]);
+guard((d2.l + nE.r) / 2, 492, '[PDF hỏng]');
+g.line([[cx(0), nE.b], [cx(0), 546]]);
+fin(cx(0), 560);
+const n5 = N(1, 554, ['Lưu page_N.png,', 'gửi image-arrived']);
+g.line([[cx(1), d2.b], [cx(1), n5.y - 2]]);
+guard(cx(1) + 6, 544, '[đọc được]', 'start');
+// Làn 2: bố cục, cắt dòng
+const n6 = N(2, 554, ['YOLO phát hiện', 'vùng bố cục']);
 g.line([[n5.r, n5.cy], [n6.x - 2, n6.cy]]);
-const n7 = N(2, 614, ['DBNet cắt dòng;', 'lưu hình, bảng']);
+const n7 = N(2, 632, ['DBNet cắt dòng;', 'lưu hình, bảng']);
 g.line([[cx(2), n6.b], [cx(2), n7.y - 2]]);
-// làn 3, 4
-const n8 = N(3, 614, ['Nhận dạng', 'theo lô']);
-g.line([[n7.r, n7.cy], [n8.x - 2, n8.cy]]);
-const n9 = N(4, 614, ['Gom box', 'theo trang']);
-g.line([[n8.r, n8.cy], [n9.x - 2, n9.cy]]);
-g.line([[cx(2) + 40, n7.y], [cx(2) + 40, 590], [cx(4), 590], [cx(4), n9.y - 2]], { dash: true, color: '#c0702a' });
-g.text(cx(3), 580, ['hình, bảng, trang rỗng:', 'gửi thẳng ocr-completed'], { fs: 13, a: 'middle', color: '#c0702a', halo: true, lh: 15 });
-const n10 = N(4, 700, ['Gom dòng, ghi', 'text/ + JSON']);
+const d3 = D(cx(2), 722);
+g.line([[cx(2), n7.b], [cx(2), d3.t - 2]]);
+g.text(d3.l - 6, 718, 'loại', { fs: 13, a: 'end' });
+g.text(d3.l - 6, 734, 'vùng?', { fs: 13, a: 'end' });
+// Làn 3: nhận dạng dòng chữ
+const n8 = N(3, 698, ['Nhận dạng', 'theo lô']);
+g.line([[d3.r, 722], [n8.x - 2, 722]]);
+guard((d3.r + n8.x) / 2, 742, '[dòng chữ]');
+// Làn 4: hợp nhánh, tái cấu trúc, ghép
+const m = D(cx(4), 800);
+g.line([[n8.r, 722], [cx(4), 722], [cx(4), m.t - 2]]);
+g.line([[cx(2), d3.b], [cx(2), 800], [m.l - 2, 800]]);
+guard(600, 792, '[hình, bảng, trang rỗng]');
+const n9 = N(4, 852, ['Gom box', 'theo trang']);
+g.line([[cx(4), m.b], [cx(4), n9.y - 2]]);
+const n10 = N(4, 926, ['Gom dòng, ghi', 'text/ + JSON']);
 g.line([[cx(4), n9.b], [cx(4), n10.y - 2]]);
-const n11 = N(4, 780, ['Ghép trang', '→ final/<id>/']);
+const n11 = N(4, 1000, ['Ghép trang', '→ final/<id>/']);
 g.line([[cx(4), n10.b], [cx(4), n11.y - 2]]);
-const n12 = N(0, 780, ['Xem, tải', 'kết quả']);
+const n12 = N(0, 1000, ['Xem, tải', 'kết quả']);
 g.line([[n11.x, n11.cy], [n12.r + 2, n12.cy]], { label: 'merge-completed; Web UI đọc final/', at: [440, n11.cy - 8], lfs: 14 });
-g.line([[cx(0), n12.b], [cx(0), 854]]);
-g.raw(`<circle cx="${cx(0)}" cy="869" r="12" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="${cx(0)}" cy="869" r="7" fill="#111"/>`);
+g.line([[cx(0), n12.b], [cx(0), 1064]]);
+fin(cx(0), 1078);
 g.render();
 </script></body></html>

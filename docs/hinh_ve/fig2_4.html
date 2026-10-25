@@ -1,29 +1,45 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 560);
-// Tiến trình xếp dọc, kho D1 bên phải, tác nhân bên trái
-const P = [['1.0', 'Tiền xử lý'], ['2.0', 'Phân tích bố cục'], ['3.0', 'Cắt dòng chữ'], ['4.0', 'Nhận dạng chữ'], ['5.0', 'Tái cấu trúc', 'và ghép trang']];
-const cx = 360, Y = i => 56 + i * 108;
-const pr = P.map((t, i) => g.ellipse(cx, Y(i), 112, 40, t, { c: 'green', fs: 15 }));
+const g = new Dg(880, 660);
+// Tiến trình xếp dọc, kho D1 bên phải, tác nhân bên trái; tác nhân và luồng vào/ra cân bằng với biểu đồ ngữ cảnh (Hình 2-1)
+const cx = 404, R = 112;
+const p6 = g.ellipse(cx, 60, R, 36, ['6.0', 'Tra cứu kết quả'], { c: 'green', fs: 15 });
+const P = [['1.0', 'Tiếp nhận và', 'tiền xử lý'], ['2.0', 'Phân tích bố cục'], ['3.0', 'Cắt dòng chữ'], ['4.0', 'Nhận dạng chữ'], ['5.0', 'Tái cấu trúc', 'và ghép trang']];
+const Y = [170, 274, 378, 482, 586];
+const pr = P.map((t, i) => g.ellipse(cx, Y[i], R, t.length > 2 ? 40 : 36, t, { c: 'green', fs: 15 }));
 const flow = ['trang mới', 'vùng bố cục', 'khóa ảnh dòng', 'chữ từng dòng'];
 for (let i = 0; i < 4; i++) {
   g.line([[cx, pr[i].b], [cx, pr[i + 1].y - 1]]);
   g.text(cx + 10, (pr[i].b + pr[i + 1].y) / 2 + 5, flow[i], { fs: 15, halo: true });
 }
-const u = g.box(4, 22, 170, 66, ['Người dùng /', 'hệ thống nguồn'], { c: 'gray', fs: 15, title: false });
-g.line([[u.r, 56], [pr[0].x - 1, 56]], { label: 'tệp PDF', at: [211, 46], lfs: 15 });
-const dst = g.box(4, 404, 170, 60, 'Hệ thống đích', { c: 'gray', fs: 15 });
-g.line([[pr[4].x + 6, Y(4) - 8], [dst.r + 1, 434]]);
-g.text(89, 488, ['kết quả số hóa,', 'sự kiện hoàn thành'], { fs: 14, a: 'middle', lh: 17 });
+// Điểm trên viền elip theo góc (độ, 0 = bên phải, chiều kim đồng hồ)
+const on = (e, deg) => [Math.round(e.cx + e.rx * Math.cos(deg * Math.PI / 180)), Math.round(e.cy + e.ry * Math.sin(deg * Math.PI / 180))];
+// Tác nhân ngoài
+const user = g.box(4, 92, 146, 52, 'Người dùng', { c: 'gray', fs: 15 });
+g.line([on(p6, 160), [user.r + 2, 104]]);
+g.text(215, 64, 'trạng thái, kết quả', { fs: 14, a: 'middle', halo: true });
+g.line([[user.r, 132], on(pr[0], 190)]);
+g.text(210, 164, 'tệp PDF', { fs: 14, a: 'middle', halo: true });
+const src = g.box(4, 196, 146, 52, 'Hệ thống nguồn', { c: 'gray', fs: 15 });
+g.line([[src.r, 222], on(pr[0], 160)]);
+g.text(158, 240, 'tệp PDF (S3 API)', { fs: 14, halo: true });
+const adm = g.box(4, 300, 146, 52, 'Quản trị viên', { c: 'gray', fs: 15 });
+g.line([[adm.r, 326], on(pr[0], 125)]);
+g.text(262, 320, 'cấu hình, giám sát', { fs: 14, a: 'middle', halo: true });
+const dst = g.box(4, 560, 146, 52, 'Hệ thống đích', { c: 'gray', fs: 15 });
+g.line([[pr[4].x, 586], [dst.r + 2, 586]]);
+g.text(77, 632, ['Markdown/JSON/TXT,', 'sự kiện hoàn thành'], { fs: 14, a: 'middle', lh: 17 });
+// Vùng hình, bảng và trang rỗng đi thẳng từ 3.0 sang 5.0, không qua nhận dạng
+g.line([[pr[2].x, 378], [256, 378], [256, 560], on(pr[4], 218)]);
+g.text(248, 462, ['hình, bảng,', 'trang rỗng'], { fs: 14, a: 'end', lh: 17 });
 // Kho dữ liệu D1
-g.raw(`<rect x="660" y="14" width="216" height="532" fill="#fdf3d0" stroke="#b8921e" stroke-width="2"/><line x1="660" y1="62" x2="876" y2="62" stroke="#b8921e" stroke-width="2"/>`);
-g.text(768, 46, 'D1  MinIO data-lake', { fs: 16, a: 'middle', bold: true });
-['raw/', 'pic/', 'crop/', 'assets/', 'text/', 'preprocessed/', 'final/'].forEach((k, i) => g.text(680, 96 + i * 26, k, { fs: 15, mono: true }));
-const st = [['ảnh trang', 'w'], ['ảnh trang', 'r'], ['ảnh dòng, ảnh bảng/hình', 'w'], ['ảnh dòng', 'r'], ['văn bản, Markdown, JSON', 'w']];
-st.forEach(([t, dir], i) => {
-  const y = Y(i);
-  if (dir === 'w') g.line([[pr[i].r, y], [658, y]]); else g.line([[658, y], [pr[i].r + 1, y]]);
-  g.text(566, y - 9, t, { fs: 14, a: 'middle', halo: true });
+g.raw(`<rect x="690" y="14" width="186" height="632" fill="#fdf3d0" stroke="#b8921e" stroke-width="2"/><line x1="690" y1="62" x2="876" y2="62" stroke="#b8921e" stroke-width="2"/>`);
+g.text(783, 46, 'D1  MinIO data-lake', { fs: 16, a: 'middle', bold: true });
+['raw/', 'pic/', 'crop/', 'assets/', 'text/', 'preprocessed/', 'final/', 'errors/'].forEach((k, i) => g.text(708, 96 + i * 26, k, { fs: 15, mono: true }));
+const st = [[p6, 'trạng thái, kết quả', 'r'], [pr[0], 'PDF gốc, ảnh trang', 'w'], [pr[1], 'ảnh trang', 'r'], [pr[2], 'ảnh dòng, ảnh bảng/hình', 'w'], [pr[3], 'ảnh dòng', 'r'], [pr[4], 'văn bản, Markdown, JSON', 'w']];
+st.forEach(([e, t, dir]) => {
+  if (dir === 'w') g.line([[e.r, e.cy], [688, e.cy]]); else g.line([[688, e.cy], [e.r + 1, e.cy]]);
+  g.text(602, e.cy - 9, t, { fs: 14, a: 'middle', halo: true });
 });
 g.render();
 </script></body></html>

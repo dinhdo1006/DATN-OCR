@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+const g = new Dg(880, 200);
+// Bộ trọng số docstructbench huấn luyện ở imgsz 1024: ảnh được co giữ tỉ lệ, cạnh dài 1024, phần thiếu đệm thêm
+const B = [
+  [['Ảnh trang', 'cạnh dài 1024', '(giữ tỉ lệ)'], 'gray'],
+  [['Backbone', 'CNN trích xuất', 'đặc trưng'], 'blue'],
+  [['Neck', 'FPN / PAN', 'đa tỉ lệ'], 'blue'],
+  [['Head', 'tọa độ hộp +', 'xác suất lớp'], 'green'],
+  [['Vùng bố cục', 'title, text,', 'figure, table…'], 'orange']
+];
+const w = 150, gap = 26, x0 = (880 - (5 * w + 4 * gap)) / 2;
+const bx = B.map(([t, c], i) => g.box(x0 + i * (w + gap), 18, w, 112, t, { c, fs: 17, title: false, lh: 22 }));
+for (let i = 0; i < 4; i++) g.line([[bx[i].r, 74], [bx[i + 1].x - 1, 74]]);
+g.text(440, 170, 'Dự đoán trong một lượt lan truyền; hồi quy hộp bằng L_box = 1 − CIoU', { fs: 15, a: 'middle', italic: true, color: '#333' });
+g.render();
+</script></body></html>

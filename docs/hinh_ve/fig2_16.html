@@ -1,43 +1,46 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 470);
-g.box(4, 4, 872, 462, [], { c: 'white', rx: 8, stroke: '#888', sw: 1.5 });
+const g = new Dg(880, 534);
+g.box(4, 4, 872, 526, [], { c: 'white', rx: 8, stroke: '#888', sw: 1.5 });
 g.box(4, 4, 872, 44, [], { c: 'blue', rx: 8, fill: '#2f5d8a', stroke: '#2f5d8a' });
 g.text(22, 32, 'OCR tiếng Việt', { fs: 18, bold: true, color: '#fff' });
-// Cột trái: tải lên + danh sách
-g.box(20, 64, 330, 78, ['Kéo thả hoặc chọn tệp PDF', '(một hoặc nhiều tệp)'], { c: 'gray', dash: true, fs: 16, title: false, fill: '#f7f9fc' });
-g.text(24, 172, 'Tài liệu', { fs: 17, bold: true });
-g.box(270, 154, 80, 28, 'Làm mới', { c: 'white', fs: 14, rx: 14, stroke: '#2f5d8a' });
-const cols = [24, 168, 286];
-['Tên', 'Trạng thái', 'Tiến độ'].forEach((h, i) => g.text(cols[i], 210, h, { fs: 15, bold: true, color: '#555' }));
-g.raw(`<line x1="20" y1="220" x2="350" y2="220" stroke="#ccc" stroke-width="1.5"/>`);
+// Ô tải lên nằm ngang phía trên, bên dưới chia hai cột như giao diện thật (Hình 3-3)
+g.box(20, 62, 840, 52, 'Kéo thả tệp PDF vào đây hoặc bấm để chọn (có thể chọn nhiều tệp)', { c: 'gray', dash: true, fs: 16, title: false, fill: '#f7f9fc' });
+const D = 64;  // các phần bên dưới dời xuống nhường chỗ cho ô tải lên
+// Cột trái: danh sách tài liệu
+g.box(20, 64 + D, 334, 390, [], { c: 'white', rx: 6, stroke: '#bbb', sw: 1.5 });
+g.text(36, 172 + D - 76, 'Tài liệu', { fs: 17, bold: true });
+g.box(262, 154 + D - 76, 80, 28, 'Làm mới', { c: 'white', fs: 14, rx: 14, stroke: '#2f5d8a' });
+const cols = [36, 170, 302];
+['Tên', 'Trạng thái', 'Tiến độ'].forEach((h, i) => g.text(cols[i], 210 + D - 76, h, { fs: 15, bold: true, color: '#555' }));
+g.raw(`<line x1="32" y1="${220 + D - 76}" x2="342" y2="${220 + D - 76}" stroke="#ccc" stroke-width="1.5"/>`);
 const R = [['hop_dong_01', 'Hoàn tất', '3/3', '#2e7d32'], ['cong_van_12', 'Đang nhận dạng', '1/2', '#c0702a'], ['hoa_don_07', 'Đang phân tích', '0/1', '#2f5d8a'], ['bao_cao_q3', 'Đang chờ NiFi', '–', '#777'], ['pdf_hong', 'Lỗi', '–', '#c0504d']];
 R.forEach((r, i) => {
-  const y = 250 + i * 40;
-  if (i === 0) g.raw(`<rect x="20" y="${y - 24}" width="330" height="36" fill="#e8f0fb"/>`);
+  const y = 250 + D - 76 + i * 40;
+  if (i === 0) g.raw(`<rect x="32" y="${y - 24}" width="310" height="36" fill="#e8f0fb"/>`);
   g.text(cols[0], y, r[0], { fs: 15 });
   g.text(cols[1], y, r[1], { fs: 14, color: r[3], bold: true });
   g.text(cols[2], y, r[2], { fs: 15 });
-  g.raw(`<line x1="20" y1="${y + 14}" x2="350" y2="${y + 14}" stroke="#eee" stroke-width="1"/>`);
+  g.raw(`<line x1="32" y1="${y + 14}" x2="342" y2="${y + 14}" stroke="#eee" stroke-width="1"/>`);
 });
 // Cột phải: kết quả
-g.box(370, 64, 494, 390, [], { c: 'white', rx: 6, stroke: '#bbb', sw: 1.5 });
-g.text(386, 96, 'Kết quả: hop_dong_01', { fs: 16, bold: true });
-g.box(574, 76, 84, 30, 'Trình bày', { c: 'blue', fs: 13, rx: 4, fill: '#2f5d8a', color: '#fff' });
-g.box(658, 76, 70, 30, 'Văn bản', { c: 'white', fs: 13, rx: 4 });
-g.box(736, 76, 38, 30, '.md', { c: 'blue', fs: 13, rx: 4 });
-g.box(777, 76, 44, 30, '.json', { c: 'white', fs: 13, rx: 4, stroke: '#2f5d8a' });
-g.box(824, 76, 34, 30, '.txt', { c: 'white', fs: 13, rx: 4, stroke: '#2f5d8a' });
-g.text(386, 140, 'TRANG 1', { fs: 13, color: '#777' });
-g.text(386, 166, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', { fs: 15, bold: true });
-g.text(386, 192, 'HỢP ĐỒNG DỊCH VỤ', { fs: 15, bold: true });
-g.text(386, 218, 'Số: 01/2026/HĐDV', { fs: 15 });
-g.text(386, 244, ['Căn cứ Bộ luật Dân sự ngày 24/11/2015 …'], { fs: 15 });
-g.text(386, 274, '▸ Xem ảnh bảng gốc', { fs: 13, color: '#777' });
-const tx = 386, ty = 286, tw = [150, 150, 150];
+g.box(370, 64 + D, 494, 390, [], { c: 'white', rx: 6, stroke: '#bbb', sw: 1.5 });
+g.text(386, 96 + D, 'Kết quả: hop_dong_01', { fs: 16, bold: true });
+g.box(574, 76 + D, 84, 30, 'Trình bày', { c: 'blue', fs: 13, rx: 4, fill: '#2f5d8a', color: '#fff' });
+g.box(658, 76 + D, 70, 30, 'Văn bản', { c: 'white', fs: 13, rx: 4 });
+g.box(736, 76 + D, 38, 30, '.md', { c: 'blue', fs: 13, rx: 4 });
+g.box(777, 76 + D, 44, 30, '.json', { c: 'white', fs: 13, rx: 4, stroke: '#2f5d8a' });
+g.box(824, 76 + D, 34, 30, '.txt', { c: 'white', fs: 13, rx: 4, stroke: '#2f5d8a' });
+g.text(386, 140 + D, 'TRANG 1', { fs: 13, color: '#777' });
+g.text(386, 166 + D, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', { fs: 15, bold: true });
+g.text(386, 192 + D, 'HỢP ĐỒNG DỊCH VỤ', { fs: 15, bold: true });
+g.text(386, 218 + D, 'Số: 01/2026/HĐDV', { fs: 15 });
+g.text(386, 244 + D, ['Căn cứ Bộ luật Dân sự ngày 24/11/2015 …'], { fs: 15 });
+g.text(386, 274 + D, '▸ Xem ảnh bảng gốc', { fs: 13, color: '#777' });
+const tx = 386, ty = 286 + D, tw = [150, 150, 150];
 ['Hạng mục', 'Đơn giá', 'Thành tiền'].forEach((h, i) => g.box(tx + i * 154, ty, tw[i], 30, h, { c: 'blue', fs: 14, rx: 0, sw: 1, bold: true }));
 [['Số hóa tài liệu', '2.000', '10.000.000'], ['Lưu trữ', '500', '2.500.000']].forEach((r, k) => r.forEach((c, i) => g.box(tx + i * 154, ty + 30 + k * 30, tw[i], 30, c, { c: 'white', fs: 14, rx: 0, sw: 1 })));
-g.text(386, 400, 'TRANG 2', { fs: 13, color: '#777' });
-g.text(386, 426, 'Điều 1. Phạm vi …', { fs: 15 });
+g.text(386, 400 + D, 'TRANG 2', { fs: 13, color: '#777' });
+g.text(386, 426 + D, 'Điều 1. Phạm vi …', { fs: 15 });
 g.render();
 </script></body></html>
