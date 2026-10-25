@@ -244,6 +244,12 @@ Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối ch�
 - Lưu ý: worker PaddleOCR chạy `paddleocr_crop/crop_paddleocr.py` (group `ocr-crop-group`, commit thủ công); `paddleocr_crop/app.py` là bản cũ không dùng.
 - Báo cáo 87 trang, slide 26 trang (slide 7, 10, 12, 17 dùng hình mới).
 
+## 7b12. Chạy thử demo bảo vệ (24/10/2026)
+
+- Thư mục `../Demo/` (ngoài repo): `demo_decuong_2trang.pdf` (trang 2–3 của decuong4.pdf, PDF xuất từ Word), `pdf_hong.pdf` (cắt cụt 20 KB), `HuongDan_Demo.txt` (chuẩn bị, kịch bản 4 bước, dự phòng), ảnh/Markdown dự phòng.
+- CPU, 10 container, NiFi 11/11 Running: 2 trang xong sau 58 s và 59 s (lần 2 tên `bench_demo_2trang`, Markdown giống hệt trừ tên); `pdf_hong` báo lỗi HTTP 422 sau 2 s. Đã xóa dữ liệu `bench_*` bằng `tools/clean_bench.py --xoa`; giữ `demo_decuong_2trang` trong MinIO để làm kết quả có sẵn.
+- Báo cáo: Tóm tắt, Bảng 3-11 (mục tiêu) và Kết luận đổi CER tài liệu có bảng từ 5,44% sang 4,95% cho khớp Bảng 3-9 (số đo sau cùng 19/10); Bảng 3-8 và các đoạn kể lần đo trước giữ 5,44%. Slide 18 đổi tương tự; slide 7, 19 (so sánh trọng số) giữ 5,44%. Báo cáo 85 trang.
+
 ## 7c. Lưu ý vận hành
 
 - Docker Desktop dùng chung ~8 GB RAM với CVAT/nuclio. Khi quá tải engine có thể treo (`docker stop` không phản hồi); cách gỡ: restart máy, rồi dừng CVAT trước khi chạy OCR nặng.
