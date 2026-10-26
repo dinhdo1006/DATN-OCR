@@ -1,26 +1,38 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 360);
-// Tầng trên chỉ dùng tầng dưới; Kafka và MinIO là hạ tầng dùng chung nên cùng nằm ở đáy
-const L = [
-  { n: ['Giao diện'], c: 'purple', items: [['Trang web', '(HTML, JavaScript)'], ['web_ui API', '(FastAPI, :8501)']] },
-  { n: ['Điều phối'], c: 'blue', items: [['Apache NiFi', '(11 processor)'], ['Preprocess', '(FastAPI, :5000)']] },
-  { n: ['AI worker'], c: 'green', items: [['layout'], ['paddleocr'], ['vietocr'], ['reconstruct'], ['merge']] },
-  { n: ['Hạ tầng', 'dùng chung'], c: 'gray', items: [['Thông điệp', 'Apache Kafka – 6 topic'], ['Lưu trữ', 'MinIO data-lake, Docker volume']], sub: ['orange', 'yellow'] }
-];
-const x0 = 6, w = 800, h = 66, gap = 14, lw = 140;
-L.forEach((l, i) => {
-  const y = 8 + i * (h + gap);
-  g.box(x0, y, w, h, [], { c: l.c, rx: 8 });
-  g.text(x0 + 14, y + h / 2 + 6 - (l.n.length - 1) * 10, l.n, { fs: 16, bold: true, lh: 20 });
-  const n = l.items.length, iw = (w - lw - 14 - (n - 1) * 8) / n;
-  l.items.forEach((it, k) => {
-    const c = l.sub ? l.sub[k] : null;
-    g.box(x0 + lw + k * (iw + 8), y + 9, iw, h - 18, it, c ? { c, fs: 16, lh: 19 } : { c: 'white', fs: 16, title: false, stroke: PAL[l.c][1] });
-  });
-  if (i < L.length - 1) g.line([[x0 + w + 36, y + 20], [x0 + w + 36, y + h + gap + 20]]);
-});
-g.raw(`<text x="866" y="166" font-size="15" fill="#333" text-anchor="middle" transform="rotate(90 866 166)">phụ thuộc một chiều</text>`);
-g.text(406, 346, 'web_ui chỉ đọc, ghi MinIO; các worker không gọi nhau mà chỉ nối qua Kafka và MinIO.', { fs: 14, a: 'middle', italic: true, color: '#444' });
+// Biểu đồ gói UML theo tầng: gói có tab tên, phụ thuộc «use» nét đứt mũi tên mở; ba gói trên chỉ phụ thuộc gói hạ tầng
+const g = new Dg(880, 478);
+function pkg(x, y, w, h, name, c) {
+  const [fill, stroke] = PAL[c], tw = 30 + name.length * 9;
+  g.raw(`<rect x="${x}" y="${y}" width="${tw}" height="24" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/>`);
+  g.raw(`<rect x="${x}" y="${y + 24}" width="${w}" height="${h - 24}" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/>`);
+  g.text(x + 10, y + 17, name, { fs: 15, bold: true });
+  return { x, y, w, h, tw, r: x + w, b: y + h, body: y + 24, cx: x + w / 2 };
+}
+const comp = (x, y, w, lines, c) => g.box(x, y, w, 54, lines, { c: 'white', fs: 15, title: false, stroke: PAL[c][1], lh: 18 });
+const use = (pts, at, la = 'start') => { g.line(pts, { dash: true, end: 'open' }); g.text(at[0], at[1], '«use»', { fs: 13, a: la, italic: true, halo: true }); };
+// Gói giao diện và điều phối
+const ui = pkg(90, 10, 250, 112, 'Giao diện', 'purple');
+comp(100, 50, 112, ['Trang web', '(HTML, JS)'], 'purple');
+comp(220, 50, 110, ['web_ui API', '(FastAPI)'], 'purple');
+const dp = pkg(370, 10, 420, 112, 'Điều phối', 'blue');
+const nifi = comp(386, 50, 170, ['Apache NiFi', '(11 processor)'], 'blue');
+const pre = comp(604, 50, 170, ['Preprocess', '(FastAPI)'], 'blue');
+g.line([[nifi.r, nifi.cy], [pre.x - 2, nifi.cy]], { dash: true, end: 'open' });
+g.text((nifi.r + pre.x) / 2, nifi.cy - 8, '«call»', { fs: 13, a: 'middle', italic: true, halo: true });
+// Gói worker xử lý
+const wk = pkg(90, 168, 700, 112, 'Worker xử lý', 'green');
+const W = [['layout', 'DocLayout-YOLO'], ['paddleocr', 'DBNet'], ['vietocr', 'VietOCR'], ['reconstruct', 'gom dòng'], ['merge', 'ghép trang']];
+const cw = 126, cg = (680 - 5 * cw) / 4;
+W.forEach((t, i) => comp(100 + i * (cw + cg), 208, cw, t, 'green'));
+// Gói hạ tầng dùng chung
+const hz = pkg(10, 340, 860, 104, 'Hạ tầng dùng chung', 'gray');
+g.box(30, 380, 400, 50, ['Apache Kafka', '6 topic, KRaft'], { c: 'orange', fs: 15, title: false, lh: 18 });
+g.box(450, 380, 400, 50, ['MinIO', 'bucket data-lake, Docker volume'], { c: 'yellow', fs: 15, title: false, lh: 18 });
+// Phụ thuộc giữa các gói
+use([[ui.x, 66], [40, 66], [40, hz.y - 2]], [46, 250]);
+use([[dp.r, 66], [836, 66], [836, hz.body - 2]], [830, 250], 'end');
+use([[wk.cx, wk.b], [wk.cx, hz.body - 2]], [wk.cx + 8, 314]);
+g.text(440, 466, 'Không có phụ thuộc giữa ba gói phía trên và không có phụ thuộc vòng; Kafka, MinIO không phụ thuộc gói nào dùng chúng.', { fs: 13.5, a: 'middle', italic: true, color: '#444' });
 g.render();
 </script></body></html>

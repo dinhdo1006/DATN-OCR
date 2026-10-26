@@ -19,9 +19,11 @@ function drawSeq(spec) {
   svg.push(`<defs><marker id="fill" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#222"/></marker>
   <marker id="open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto"><path d="M0,0 L11,6 L0,12" fill="none" stroke="#222" stroke-width="1.6"/></marker></defs>`);
   // khung loop/opt (vẽ trước để nằm dưới)
+  // khung ngoài vẽ trước khung lồng bên trong; inset thụt khung lồng vào so với khung ngoài
+  frags.sort((p, q) => p.y0 - q.y0 || (q.y1 - q.y0) - (p.y1 - p.y0));
   for (const f of frags) {
-    const xs = f.over.map(n => X(idx(n)));
-    const x0 = Math.min(...xs) - colW * 0.42, x1 = Math.max(...xs) + colW * 0.42;
+    const xs = f.over.map(n => X(idx(n))), ins = f.inset || 0;
+    const x0 = Math.min(...xs) - colW * 0.42 + ins, x1 = Math.max(...xs) + colW * 0.42 - ins;
     svg.push(`<rect x="${x0}" y="${f.y0}" width="${x1 - x0}" height="${f.y1 - f.y0}" fill="#fafafa" stroke="#888" stroke-width="1.5"/>`);
     const tw = 18 + f.frag.length * 11;
     svg.push(`<path d="M${x0},${f.y0} h${tw} v16 l-8,8 h${-(tw - 8)} z" fill="#eee" stroke="#888" stroke-width="1.2"/>`);
@@ -31,6 +33,13 @@ function drawSeq(spec) {
   // đường đời
   P.forEach((p, i) => {
     svg.push(`<line x1="${X(i)}" y1="${TOP - 20}" x2="${X(i)}" y2="${H - 10}" stroke="#999" stroke-width="1.6" stroke-dasharray="7 6"/>`);
+    // tác nhân (spec.actors) vẽ hình người thay cho hộp
+    if ((spec.actors || []).includes(p)) {
+      const x = X(i);
+      svg.push(`<g stroke="#222" stroke-width="2.2" fill="none"><circle cx="${x}" cy="28" r="10" fill="#fff"/><line x1="${x}" y1="38" x2="${x}" y2="62"/><line x1="${x - 16}" y1="46" x2="${x + 16}" y2="46"/><line x1="${x}" y1="62" x2="${x - 13}" y2="80"/><line x1="${x}" y1="62" x2="${x + 13}" y2="80"/></g>`);
+      svg.push(`<text x="${x}" y="100" text-anchor="middle" font-size="19" font-weight="700" fill="#111" ${HALO}>${esc(p)}</text>`);
+      return;
+    }
     const bw = Math.min(colW - 16, 210);
     svg.push(`<rect x="${X(i) - bw / 2}" y="20" width="${bw}" height="70" rx="8" fill="#dbe8f6" stroke="#2f5d8a" stroke-width="2.2"/>`);
     const parts = p.split('\n');

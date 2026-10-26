@@ -1,10 +1,11 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 1100);
+const H = 1172;
+const g = new Dg(880, H);
 const lanes = [['Người dùng /', 'Web UI'], ['NiFi +', 'Preprocess'], ['Layout +', 'PaddleOCR'], ['VietOCR'], ['Reconstruct', '+ Merge']];
 const LW = 176, cx = i => i * LW + LW / 2;
 lanes.forEach((l, i) => {
-  g.raw(`<rect x="${i * LW + 1}" y="1" width="${LW - 2}" height="1096" fill="${i % 2 ? '#fafafa' : '#fff'}" stroke="#bbb" stroke-width="1.5"/>`);
+  g.raw(`<rect x="${i * LW + 1}" y="1" width="${LW - 2}" height="${H - 4}" fill="${i % 2 ? '#fafafa' : '#fff'}" stroke="#bbb" stroke-width="1.5"/>`);
   g.raw(`<rect x="${i * LW + 1}" y="1" width="${LW - 2}" height="54" fill="#e8e8e8" stroke="#bbb" stroke-width="1.5"/>`);
   g.text(cx(i), l.length > 1 ? 24 : 34, l, { fs: 15, a: 'middle', bold: true, lh: 19 });
 });
@@ -20,56 +21,61 @@ g.line([[cx(0), 86], [cx(0), n1.y - 2]]);
 const d1 = D(cx(0), 196);
 g.line([[cx(0), n1.b], [cx(0), d1.t - 2]]);
 g.text(d1.r + 6, 188, 'hợp lệ?', { fs: 14 });
-g.line([[d1.l, 196], [26, 196], [26, 244]]);
+// [không]: Web UI trả lỗi rồi kết thúc
+g.line([[d1.l, 196], [43, 196], [43, 230]]);
 guard(6, 188, '[không]', 'start');
-fin(26, 258);
-g.text(6, 290, 'lỗi 400/413', { fs: 14 });
-const n2 = N(0, 318, ['Lưu', 'raw/<id>.pdf']);
+const nx = g.box(6, 232, 74, 40, ['Trả lỗi', '400/413'], { c: 'yellow', fs: 13, title: false, lh: 16 });
+g.line([[43, nx.b], [43, 284]]);
+fin(43, 298);
+const n2 = N(0, 324, ['Lưu', 'raw/<id>.pdf']);
 g.line([[cx(0), d1.b], [cx(0), n2.y - 2]]);
 guard(cx(0) + 6, 250, '[có]', 'start');
 // Làn 1: NiFi tiếp nhận, gọi tiền xử lý
-const n3 = N(1, 318, ['ListS3 phát hiện,', 'Fetch tệp']);
+const n3 = N(1, 324, ['ListS3 phát hiện,', 'Fetch tệp']);
 g.line([[n2.r, n2.cy], [n3.x - 2, n3.cy]]);
-const n4 = N(1, 396, ['POST /process:', 'PDF → PNG', 'từng trang'], 60);
+const n4 = N(1, 400, ['POST /process:', 'PDF → PNG', 'từng trang'], 60);
 g.line([[cx(1), n3.b], [cx(1), n4.y - 2]]);
 const d2 = D(cx(1), 500);
 g.line([[cx(1), n4.b], [cx(1), d2.t - 2]]);
-// PDF hỏng: NiFi ghi errors/<id>.json, giao diện hiện trạng thái Lỗi
-const nE = N(0, 476, ['Thấy "Lỗi" + lý do', '(errors/<id>.json)']);
-g.line([[d2.l, 500], [nE.r + 2, 500]]);
-guard((d2.l + nE.r) / 2, 492, '[PDF hỏng]');
-g.line([[cx(0), nE.b], [cx(0), 546]]);
-fin(cx(0), 560);
-const n5 = N(1, 554, ['Lưu page_N.png,', 'gửi image-arrived']);
+// [PDF hỏng]: NiFi ghi bản ghi lỗi, giao diện hiện trạng thái Lỗi
+g.line([[d2.l, 500], [215, 500], [215, 538]]);
+guard(200, 492, '[PDF hỏng]');
+const nG = g.box(180, 540, 70, 58, ['Ghi', 'errors/', '<id>.json'], { c: 'yellow', fs: 13, title: false, lh: 16 });
+const nE = N(0, 545, ['Thấy "Lỗi"', 'kèm lý do']);
+g.line([[nG.x, nE.cy], [nE.r + 2, nE.cy]]);
+g.line([[cx(0), nE.b], [cx(0), 611]]);
+fin(cx(0), 625);
+// [đọc được]: lưu ảnh trang, phát sự kiện
+const n5 = N(1, 622, ['Lưu page_N.png,', 'gửi image-arrived']);
 g.line([[cx(1), d2.b], [cx(1), n5.y - 2]]);
-guard(cx(1) + 6, 544, '[đọc được]', 'start');
+guard(cx(1) + 6, 580, '[đọc được]', 'start');
 // Làn 2: bố cục, cắt dòng
-const n6 = N(2, 554, ['YOLO phát hiện', 'vùng bố cục']);
+const n6 = N(2, 622, ['YOLO phát hiện', 'vùng bố cục']);
 g.line([[n5.r, n5.cy], [n6.x - 2, n6.cy]]);
-const n7 = N(2, 632, ['DBNet cắt dòng;', 'lưu hình, bảng']);
+const n7 = N(2, 700, ['DBNet cắt dòng;', 'lưu hình, bảng']);
 g.line([[cx(2), n6.b], [cx(2), n7.y - 2]]);
-const d3 = D(cx(2), 722);
+const d3 = D(cx(2), 790);
 g.line([[cx(2), n7.b], [cx(2), d3.t - 2]]);
-g.text(d3.l - 6, 718, 'loại', { fs: 13, a: 'end' });
-g.text(d3.l - 6, 734, 'vùng?', { fs: 13, a: 'end' });
+g.text(d3.l - 6, 786, 'loại', { fs: 13, a: 'end' });
+g.text(d3.l - 6, 802, 'vùng?', { fs: 13, a: 'end' });
 // Làn 3: nhận dạng dòng chữ
-const n8 = N(3, 698, ['Nhận dạng', 'theo lô']);
-g.line([[d3.r, 722], [n8.x - 2, 722]]);
-guard((d3.r + n8.x) / 2, 742, '[dòng chữ]');
+const n8 = N(3, 766, ['Nhận dạng', 'theo lô']);
+g.line([[d3.r, 790], [n8.x - 2, 790]]);
+guard((d3.r + n8.x) / 2, 810, '[dòng chữ]');
 // Làn 4: hợp nhánh, tái cấu trúc, ghép
-const m = D(cx(4), 800);
-g.line([[n8.r, 722], [cx(4), 722], [cx(4), m.t - 2]]);
-g.line([[cx(2), d3.b], [cx(2), 800], [m.l - 2, 800]]);
-guard(600, 792, '[hình, bảng, trang rỗng]');
-const n9 = N(4, 852, ['Gom box', 'theo trang']);
+const m = D(cx(4), 868);
+g.line([[n8.r, 790], [cx(4), 790], [cx(4), m.t - 2]]);
+g.line([[cx(2), d3.b], [cx(2), 868], [m.l - 2, 868]]);
+guard(600, 860, '[hình, bảng, trang rỗng]');
+const n9 = N(4, 920, ['Gom box', 'theo trang']);
 g.line([[cx(4), m.b], [cx(4), n9.y - 2]]);
-const n10 = N(4, 926, ['Gom dòng, ghi', 'text/ + JSON']);
+const n10 = N(4, 994, ['Gom dòng, ghi', 'text/ + JSON']);
 g.line([[cx(4), n9.b], [cx(4), n10.y - 2]]);
-const n11 = N(4, 1000, ['Ghép trang', '→ final/<id>/']);
+const n11 = N(4, 1068, ['Ghép trang', '→ final/<id>/']);
 g.line([[cx(4), n10.b], [cx(4), n11.y - 2]]);
-const n12 = N(0, 1000, ['Xem, tải', 'kết quả']);
-g.line([[n11.x, n11.cy], [n12.r + 2, n12.cy]], { label: 'merge-completed; Web UI đọc final/', at: [440, n11.cy - 8], lfs: 14 });
-g.line([[cx(0), n12.b], [cx(0), 1064]]);
-fin(cx(0), 1078);
+const n12 = N(0, 1068, ['Xem, tải', 'kết quả']);
+g.line([[n11.x, n11.cy], [n12.r + 2, n12.cy]], { label: 'kết quả trong final/ (Web UI đọc khi làm mới)', at: [440, n11.cy - 8], lfs: 14 });
+g.line([[cx(0), n12.b], [cx(0), 1132]]);
+fin(cx(0), 1146);
 g.render();
 </script></body></html>

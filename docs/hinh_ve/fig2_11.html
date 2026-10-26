@@ -4,6 +4,7 @@ drawSeq({
   width: 1100,
   row: 44,
   participants: ["Người dùng", "Trình duyệt", "web_ui", "MinIO", "Luồng\nxử lý"],
+  actors: ["Người dùng"],
   steps: [
     { f: "Người dùng", t: "Trình duyệt", l: "chọn tệp PDF", k: "sync" },
     { f: "Trình duyệt", t: "web_ui", l: "POST /api/upload", k: "sync" },
@@ -12,7 +13,7 @@ drawSeq({
     { f: "Luồng\nxử lý", t: "MinIO", l: "ListS3 nhặt tệp mới", k: "sync" },
     { frag: "loop", cond: "mỗi 4 giây, đến khi done", over: ["Trình duyệt", "MinIO"] },
     { f: "Trình duyệt", t: "web_ui", l: "GET /api/documents", k: "sync" },
-    { f: "web_ui", t: "MinIO", l: "liệt kê pic/, text/, final/", k: "sync" },
+    { f: "web_ui", t: "MinIO", l: "liệt kê pic/, text/, final/, errors/", k: "sync" },
     { f: "web_ui", t: "Trình duyệt", l: "[{id, status, tiến độ}]", k: "ret" },
     { end: true },
     { f: "Luồng\nxử lý", t: "MinIO", l: "put final/<id>/", k: "sync" },

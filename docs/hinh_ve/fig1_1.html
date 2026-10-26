@@ -12,11 +12,11 @@ g.line([[d.cx, d.b], [e.cx, e.y - 1]]);
 const f = g.box(X(2), 186, bw, 96, ['Tái cấu trúc', 'thứ tự đọc theo cột,', 'dựng bảng, ghép trang'], { c: 'orange', fs: 16, sub: 15 });
 g.line([[e.x, 234], [f.r + 1, 234]]);
 g.line([[c.cx, c.b], [c.cx, f.y - 1]], { dash: true, color: '#3c7a2e' });
-g.text(c.cx + 8, 104, ['tiêu đề · đoạn · danh sách ·', 'bảng · hình (bỏ đầu trang,', 'chân trang, số trang)'], { fs: 14, italic: true, color: '#333', lh: 17 });
+g.text(c.cx + 8, 104, ['tiêu đề · đoạn · bảng · hình ·', 'công thức (bỏ đầu trang,', 'chân trang, số trang)'], { fs: 14, italic: true, color: '#333', lh: 17 });
 g.text(c.cx + 8, 172, 'dùng loại vùng + khung vùng', { fs: 14, bold: true, color: '#3c7a2e' });
 const r = g.box(4, 140, 410, 220, [], { c: 'yellow', rx: 8 });
-g.text(r.cx, 168, 'Kết quả có cấu trúc (MinIO final/)', { fs: 16, a: 'middle', bold: true });
-[['Markdown', 'tiêu đề (#), đoạn, danh sách, bảng'], ['JSON', 'loại vùng, tọa độ, thứ tự đọc'], ['assets/', 'ảnh gốc của từng bảng, hình'], ['TXT', 'văn bản thuần, giữ thụt lề']].forEach(([k, v], i) => {
+g.text(r.cx, 168, 'Kết quả có cấu trúc (MinIO)', { fs: 16, a: 'middle', bold: true });
+[['Markdown', 'final/ – tiêu đề (#), đoạn, bảng'], ['TXT', 'final/ – văn bản thuần, giữ thụt lề'], ['JSON', 'preprocessed/ – loại vùng, tọa độ'], ['assets/', 'ảnh gốc của từng bảng, hình']].forEach(([k, v], i) => {
   g.text(20, 204 + i * 38, k, { fs: 15, bold: true });
   g.text(118, 204 + i * 38, v, { fs: 15 });
 });
