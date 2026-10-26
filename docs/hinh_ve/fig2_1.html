@@ -1,18 +1,18 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 390);
-const sys = g.ellipse(440, 195, 175, 62, ['HỆ THỐNG OCR', 'TÀI LIỆU TIẾNG VIỆT'], { c: 'blue', fs: 18, bold: true });
-g.raw(`<style>text{}</style>`);
-const u = g.box(10, 18, 210, 72, ['Người dùng', '(giao diện web)'], { c: 'gray', fs: 17 });
-const a = g.box(660, 18, 210, 72, ['Quản trị viên', '(NiFi, MinIO, Docker)'], { c: 'gray', fs: 17 });
-const s = g.box(10, 300, 210, 72, ['Hệ thống nguồn', '(ghi vào raw/)'], { c: 'gray', fs: 17 });
-const d = g.box(660, 300, 210, 72, ['Hệ thống đích', '(ERP, DMS)'], { c: 'gray', fs: 17 });
-g.line([[u.r, 62], [325, 145]], { label: 'tệp PDF', at: [300, 92], lfs: 16 });
-g.line([[282, 166], [u.cx + 20, u.b + 2]], { label: 'trạng thái, kết quả', at: [140, 146], lfs: 16 });
-g.line([[a.x, 62], [555, 145]], { label: 'cấu hình', at: [580, 92], lfs: 16 });
-g.line([[598, 166], [a.cx - 20, a.b + 2]], { label: 'nhật ký', at: [740, 146], lfs: 16 });
-g.line([[s.r, 322], [318, 238]], { label: 'tệp PDF (S3 API)', at: [210, 262], lfs: 16 });
-g.line([[575, 238], [d.x, 322]], { label: 'Markdown/JSON/TXT,', at: [700, 252], lfs: 16 });
-g.text(700, 272, 'sự kiện merge-completed', { fs: 16, a: 'middle', halo: true });
+// Biểu đồ ngữ cảnh theo ký pháp Gane–Sarson: toàn hệ thống là tiến trình số 0, bốn tác nhân ngoài
+const g = new Dg(880, 400);
+const sys = g.gsProc(440, 195, 330, 124, '0', ['HỆ THỐNG OCR', 'TÀI LIỆU TIẾNG VIỆT'], { fs: 18, bold: true, band: 30 });
+const u = g.gsEnt(10, 18, 210, 72, ['Người dùng', '(giao diện web)'], { fs: 17 });
+const a = g.gsEnt(654, 18, 210, 72, ['Quản trị viên', '(NiFi, MinIO, Docker)'], { fs: 17 });
+const s = g.gsEnt(10, 304, 210, 72, ['Hệ thống nguồn', '(ghi vào raw/)'], { fs: 17 });
+const d = g.gsEnt(654, 304, 210, 72, ['Hệ thống đích', '(ERP, DMS)'], { fs: 17 });
+g.line([[u.r, 60], [300, 60], [300, sys.y - 1]], { label: 'tệp PDF', at: [262, 50], lfs: 16 });
+g.line([[sys.x, 180], [115, 180], [115, u.b + 8]], { label: 'trạng thái, kết quả', at: [188, 172], lfs: 16 });
+g.line([[a.x, 60], [580, 60], [580, sys.y - 1]], { label: 'cấu hình', at: [618, 50], lfs: 16 });
+g.line([[sys.r, 180], [759, 180], [759, a.b + 8]], { label: 'nhật ký', at: [690, 172], lfs: 16 });
+g.line([[s.r, 340], [300, 340], [300, sys.b + 1]], { label: 'tệp PDF (S3 API)', at: [234, 366], lfs: 16, la: 'start' });
+g.line([[566, sys.b], [566, 340], [d.x - 2, 340]]);
+g.text(556, 296, ['Markdown/JSON/TXT,', 'sự kiện merge-completed'], { fs: 16, a: 'end', halo: true, lh: 20 });
 g.render();
 </script></body></html>

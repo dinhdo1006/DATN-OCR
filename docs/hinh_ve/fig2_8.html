@@ -1,40 +1,57 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
-const g = new Dg(880, 640);
-// Lớp UML: tên / thuộc tính / phương thức
-function cls(x, y, w, name, attrs, ops, c, stereo) {
-  const [fill, stroke] = PAL[c], lh = 20, hh = stereo ? 46 : 32;
-  const h = hh + attrs.length * lh + 10 + ops.length * lh + 10;
-  g.raw(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="${stroke}" stroke-width="2"/>`);
-  g.raw(`<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`);
-  if (stereo) g.text(x + w / 2, y + 18, '«interface»', { fs: 14, a: 'middle' });
-  g.text(x + w / 2, y + hh - 10, name, { fs: 16, a: 'middle', bold: true });
-  let yy = y + hh + 18;
-  attrs.forEach(a => { g.text(x + 8, yy, a, { fs: 14, mono: true }); yy += lh; });
-  g.raw(`<line x1="${x}" y1="${yy - 10}" x2="${x + w}" y2="${yy - 10}" stroke="${stroke}" stroke-width="1.5"/>`);
-  yy += 6;
-  ops.forEach(o => { g.text(x + 8, yy, o, { fs: 14, mono: true }); yy += lh; });
-  return { x, y, w, h, cx: x + w / 2, cy: y + h / 2, r: x + w, b: y + h };
+// Biểu đồ thành phần UML 2.5.1: mỗi dịch vụ là một «component»; giao diện cung cấp vẽ hình tròn (ball),
+// thành phần dùng giao diện nối tới hình tròn bằng phụ thuộc (nét đứt, mũi tên mở). Giao diện Kafka API và
+// S3 API được vẽ lặp lại ở từng hàng cho dễ đọc. Topic nhận / phát lấy từ mã nguồn của từng dịch vụ.
+const g = new Dg(960, 1070);
+function comp(x, y, w, h, name, lines, c, fs) {
+  g.box(x, y, w, h, [], { c: c || 'blue' });
+  const ix = x + w - 30, iy = y + 10;
+  g.raw(`<rect x="${ix}" y="${iy}" width="18" height="22" fill="#fff" stroke="#333" stroke-width="1.4"/><rect x="${ix - 5}" y="${iy + 4}" width="10" height="5" fill="#fff" stroke="#333" stroke-width="1.4"/><rect x="${ix - 5}" y="${iy + 13}" width="10" height="5" fill="#fff" stroke="#333" stroke-width="1.4"/>`);
+  g.text(x + w / 2, y + 24, '«component»', { fs: 15, a: 'middle', italic: true, color: '#333' });
+  g.text(x + w / 2, y + 47, name, { fs: 19, a: 'middle', bold: true, color: '#111' });
+  if (lines.length) g.text(x + 14, y + 72, lines, { fs: fs || 16, lh: 21, color: '#222' });
 }
-const W = 278, X = [6, 301, 596];
-const lw = cls(X[0], 6, W, 'LayoutWorker', ['model: YOLO', 'NAME_MAP: dict', 'DEVICE: cpu | cuda'], ['detect_layout(img)', 'run()'], 'blue');
-const pw = cls(X[1], 6, W, 'PaddleCropWorker', ['ocr: PaddleOCR', 'rec = False'], ['normalize_box(box)', 'get_rotate_crop_image()', 'run()'], 'blue');
-const vw = cls(X[2], 6, W, 'VietOCRWorker', ['BATCH_SIZE = 4 (GPU: 16)', 'detector: Predictor', 'DEVICE: cpu | cuda'], ['get_image(key, retries)', 'predict(images)'], 'blue');
-const rw = cls(X[0], 222, W, 'ReconstructWorker', ['document_buffer: dict', 'TIMEOUT = 120'], ['sort_boxes(boxes)', 'group_lines(boxes)', 'build_text(lines)', 'build_json(img, lines)'], 'blue');
-const kc = cls(X[1], 238, W, 'KafkaClient', ['bootstrap_servers', 'group_id'], ['poll() / send()', 'commit(offsets)'], 'orange', true);
-const mw = cls(X[2], 222, W, 'MergeWorker', ['document_buffer: dict', 'TIMEOUT = 180', 'EVICT_AFTER = 3600'], ['natural_key(name)', 'merge_document()', 'maybe_flush()'], 'blue');
-const ps = cls(X[0], 470, W, 'PreprocessService', ['UPLOAD_DIR'], ['POST /process', 'process_scan_pdf()'], 'purple');
-const s3 = cls(X[1], 456, W, 'S3Client', ['endpoint_url', 'bucket'], ['get_object() / put_object()', 'list_objects_v2()'], 'yellow', true);
-const wu = cls(X[2], 456, W, 'WebUIService', ['MAX_UPLOAD_MB = 100'], ['POST /api/upload', 'GET /api/documents', 'GET /api/assets'], 'purple');
-const dep = (a, b) => g.line([a, b], { dash: true, end: 'open', sw: 1.6 });
-dep([lw.cx, lw.b], [kc.x + 40, kc.y]);
-dep([pw.cx, pw.b], [kc.cx, kc.y]);
-dep([vw.cx, vw.b], [kc.r - 40, kc.y]);
-dep([rw.r, rw.y + 70], [kc.x, kc.y + 50]);
-dep([mw.x, mw.y + 70], [kc.r, kc.y + 50]);
-dep([rw.r, rw.b - 30], [s3.x + 30, s3.y]);
-dep([mw.x, mw.b - 30], [s3.r - 30, s3.y]);
-dep([wu.x, wu.y + 60], [s3.r, s3.y + 60]);
-g.text(440, 634, 'Mũi tên nét đứt: phụ thuộc vào giao diện dùng chung; các worker còn đọc, ghi MinIO qua S3Client', { fs: 14, a: 'middle', italic: true });
+const ball = (cx, cy) => g.raw(`<circle cx="${cx}" cy="${cy}" r="11" fill="#fff" stroke="#333" stroke-width="2"/>`);
+const dep = pts => g.line(pts, { end: 'open', dash: true, sw: 1.8, color: '#333' });
+// một hàng: thành phần ở cột giữa, dùng Kafka API (trái) và/hoặc S3 API (phải)
+function row(cy, kafka, s3) {
+  if (kafka) { g.line([[205, cy], [234, cy]], { end: 'none', sw: 2 }); ball(245, cy); dep([[320, cy], [258, cy]]); }
+  if (s3) { g.line([[755, cy], [726, cy]], { end: 'none', sw: 2 }); ball(715, cy); dep([[640, cy], [702, cy]]); }
+}
+
+// Hạ tầng cung cấp giao diện
+comp(20, 170, 185, 710, 'Apache Kafka', ['topic:', 'image-arrived', 'layout-completed', 'crop-completed', 'ocr-completed', 'document-', '  completed', 'merge-completed'], 'yellow', 15);
+comp(755, 170, 185, 830, 'MinIO', ['bucket data-lake:', 'raw/', 'pic/', 'crop/', 'assets/', 'text/', 'preprocessed/', 'final/', 'errors/'], 'yellow', 15);
+
+// preprocess cung cấp POST /process cho NiFi
+comp(320, 20, 320, 100, 'preprocess', ['PDF → ảnh trang PNG, đóng gói ZIP'], 'blue', 15.5);
+g.line([[480, 120], [480, 133]], { end: 'none', sw: 2 }); ball(480, 144);
+g.text(498, 150, 'POST /process', { fs: 16, bold: true });
+comp(320, 170, 320, 110, 'Apache NiFi', ['phát: image-arrived', 'S3: ListS3, Fetch, Put'], 'green');
+dep([[480, 170], [480, 158]]);
+row(225, true, true);
+g.text(245, 200, 'Kafka API', { fs: 16, a: 'middle', bold: true, halo: true });
+g.text(715, 200, 'S3 API', { fs: 16, a: 'middle', bold: true, halo: true });
+
+// Năm worker: mỗi worker nhận một topic, phát topic kế tiếp, đọc/ghi MinIO
+const W = [
+  ['layout-worker', ['nhận: image-arrived', 'phát: layout-completed']],
+  ['paddleocr-worker', ['nhận: layout-completed', 'phát: crop-completed, ocr-completed']],
+  ['vietocr-worker', ['nhận: crop-completed', 'phát: ocr-completed']],
+  ['reconstruct-worker', ['nhận: ocr-completed', 'phát: document-completed']],
+  ['merge-worker', ['nhận: document-completed', 'phát: merge-completed']]
+];
+W.forEach(([n, ls], i) => {
+  const y = 300 + i * 120;
+  comp(320, y, 320, 100, n, ls, 'blue', 15.5);
+  row(y + 50, true, true);
+});
+
+// Giao diện web: dùng S3 API, cung cấp HTTP /api/* cho trình duyệt
+comp(320, 900, 320, 100, 'web_ui', ['S3: put raw/, liệt kê, đọc final/'], 'purple', 15.5);
+row(950, false, true);
+g.line([[480, 1000], [480, 1022]], { end: 'none', sw: 2 }); ball(480, 1033);
+g.text(498, 1039, 'HTTP /api/* (trình duyệt)', { fs: 16, bold: true });
 g.render();
 </script></body></html>

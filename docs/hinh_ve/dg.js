@@ -57,3 +57,19 @@ Dg.prototype.render = function () {
   document.body.style.background = '#fff';
   document.body.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${this.W}" height="${this.H}" viewBox="0 0 ${this.W} ${this.H}" font-family="${this.font}">${defs}${this.p.join('\n')}</svg>`;
 };
+// Ký pháp Gane–Sarson cho biểu đồ luồng dữ liệu: tiến trình là hình chữ nhật bo góc có dải số hiệu ở trên,
+// tác nhân ngoài là hình chữ nhật có bóng đổ (kho dữ liệu là hộp hở cạnh phải có ô mã, vẽ trong từng hình)
+Dg.prototype.gsProc = function (cx, cy, w, h, id, lines, o = {}) {
+  const x = cx - w / 2, y = cy - h / 2, band = o.band || 26, fs = o.fs || 16, lh = fs * 1.2;
+  this.p.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="#e3f1df" stroke="#4a8a3c" stroke-width="2"/>`);
+  this.p.push(`<line x1="${x}" y1="${y + band}" x2="${x + w}" y2="${y + band}" stroke="#4a8a3c" stroke-width="1.6"/>`);
+  this.text(cx, y + band - 7, id, { fs, a: 'middle', bold: true });
+  lines = [].concat(lines);
+  const y0 = y + band + (h - band) / 2 - (lines.length - 1) * lh / 2 + fs * 0.35;
+  lines.forEach((t, i) => this.text(cx, y0 + i * lh, t, { fs, a: 'middle', bold: o.bold }));
+  return { cx, cy, x, y, r: x + w, b: y + h, w, h };
+};
+Dg.prototype.gsEnt = function (x, y, w, h, lines, o = {}) {
+  this.p.push(`<rect x="${x + 6}" y="${y + 6}" width="${w}" height="${h}" fill="#9a9a9a" stroke="none"/>`);
+  return this.box(x, y, w, h, lines, { c: 'gray', rx: 0, ...o });
+};

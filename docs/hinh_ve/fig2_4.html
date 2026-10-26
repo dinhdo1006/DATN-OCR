@@ -1,41 +1,39 @@
 <!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
 <script>
+// Biểu đồ luồng dữ liệu mức 0 theo ký pháp Gane–Sarson. Tiến trình xếp dọc, kho D1 bên phải, tác nhân bên trái;
+// tác nhân và luồng vào/ra cân bằng với biểu đồ ngữ cảnh (Hình 2-1)
 const g = new Dg(880, 660);
-// Tiến trình xếp dọc, kho D1 bên phải, tác nhân bên trái; tác nhân và luồng vào/ra cân bằng với biểu đồ ngữ cảnh (Hình 2-1)
-const cx = 404, R = 112;
-const p6 = g.ellipse(cx, 60, R, 36, ['6.0', 'Tra cứu kết quả'], { c: 'green', fs: 15 });
-const P = [['1.0', 'Tiếp nhận và', 'tiền xử lý'], ['2.0', 'Phân tích bố cục'], ['3.0', 'Cắt dòng chữ'], ['4.0', 'Nhận dạng chữ'], ['5.0', 'Tái cấu trúc', 'và ghép trang']];
+const cx = 404, PW = 224, PH = 76;
+const p6 = g.gsProc(cx, 60, PW, PH, '6.0', 'Tra cứu kết quả', { fs: 15 });
+const P = [['1.0', ['Tiếp nhận và', 'tiền xử lý']], ['2.0', 'Phân tích bố cục'], ['3.0', 'Cắt dòng chữ'], ['4.0', 'Nhận dạng chữ'], ['5.0', ['Tái cấu trúc', 'và ghép trang']]];
 const Y = [170, 274, 378, 482, 586];
-const pr = P.map((t, i) => g.ellipse(cx, Y[i], R, t.length > 2 ? 40 : 36, t, { c: 'green', fs: 15 }));
+const pr = P.map(([id, t], i) => g.gsProc(cx, Y[i], PW, PH, id, t, { fs: 15 }));
 const flow = ['trang mới', 'vùng bố cục', 'khóa ảnh dòng', 'chữ từng dòng'];
 for (let i = 0; i < 4; i++) {
   g.line([[cx, pr[i].b], [cx, pr[i + 1].y - 1]]);
   g.text(cx + 10, (pr[i].b + pr[i + 1].y) / 2 + 5, flow[i], { fs: 15, halo: true });
 }
-// Điểm trên viền elip theo góc (độ, 0 = bên phải, chiều kim đồng hồ); điểm trên viền phải ở độ lệch dy so với tâm
-const on = (e, deg) => [Math.round(e.cx + e.rx * Math.cos(deg * Math.PI / 180)), Math.round(e.cy + e.ry * Math.sin(deg * Math.PI / 180))];
-const rx = (e, dy) => Math.round(e.cx + e.rx * Math.sqrt(1 - (dy / e.ry) ** 2));
 // Tác nhân ngoài
-const user = g.box(4, 92, 146, 52, 'Người dùng', { c: 'gray', fs: 15 });
-g.line([[96, user.y - 1], [96, 57], [291, 57]]);
+const user = g.gsEnt(4, 92, 140, 52, 'Người dùng', { fs: 15 });
+g.line([[74, user.y - 1], [74, 57], [p6.x - 1, 57]]);
 g.text(186, 50, 'yêu cầu xem, tải', { fs: 14, a: 'middle', halo: true });
-g.line([on(p6, 160), [user.r + 2, 104]]);
-g.text(250, 118, 'trạng thái, kết quả', { fs: 14, a: 'middle', halo: true });
-g.line([[user.r, 132], on(pr[0], 190)]);
-g.text(214, 166, 'tệp PDF', { fs: 14, a: 'middle', halo: true });
-const src = g.box(4, 196, 146, 52, 'Hệ thống nguồn', { c: 'gray', fs: 15 });
-g.line([[src.r, 222], on(pr[0], 160)]);
-g.text(156, 186, 'tệp PDF (S3 API)', { fs: 14, halo: true });
-const adm = g.box(4, 300, 146, 52, 'Quản trị viên', { c: 'gray', fs: 15 });
-g.line([[adm.r, 340], on(pr[0], 118)]);
-g.text(158, 352, 'cấu hình', { fs: 14, halo: true });
-g.line([on(pr[0], 145), [adm.r + 2, 304]]);
+g.line([[p6.x, 86], [user.r + 8, 104]]);
+g.text(236, 120, 'trạng thái, kết quả', { fs: 14, a: 'middle', halo: true });
+g.line([[user.r, 134], [pr[0].x - 1, 150]]);
+g.text(214, 160, 'tệp PDF', { fs: 14, a: 'middle', halo: true });
+const src = g.gsEnt(4, 196, 140, 52, 'Hệ thống nguồn', { fs: 15 });
+g.line([[src.r, 222], [pr[0].x - 1, 178]]);
+g.text(156, 190, 'tệp PDF (S3 API)', { fs: 14, halo: true });
+const adm = g.gsEnt(4, 300, 140, 52, 'Quản trị viên', { fs: 15 });
+g.line([[adm.r, 326], [pr[0].x + 18, pr[0].b + 1]]);
+g.text(158, 356, 'cấu hình', { fs: 14, halo: true });
+g.line([[pr[0].x, 198], [adm.r + 8, 306]]);
 g.text(158, 262, 'nhật ký', { fs: 14, halo: true });
-const dst = g.box(4, 560, 146, 52, 'Hệ thống đích', { c: 'gray', fs: 15 });
-g.line([[pr[4].x, 586], [dst.r + 2, 586]]);
-g.text(77, 632, ['Markdown/JSON/TXT,', 'sự kiện hoàn thành'], { fs: 14, a: 'middle', lh: 17 });
+const dst = g.gsEnt(4, 560, 140, 52, 'Hệ thống đích', { fs: 15 });
+g.line([[pr[4].x, 600], [dst.r + 8, 600]]);
+g.text(77, 640, ['Markdown/JSON/TXT,', 'sự kiện hoàn thành'], { fs: 14, a: 'middle', lh: 17 });
 // Vùng hình, bảng và trang rỗng đi thẳng từ 3.0 sang 5.0, không qua nhận dạng
-g.line([[pr[2].x, 378], [256, 378], [256, 560], on(pr[4], 218)]);
+g.line([[pr[2].x, 378], [256, 378], [256, 566], [pr[4].x - 1, 566]]);
 g.text(248, 462, ['hình, bảng,', 'trang rỗng'], { fs: 14, a: 'end', lh: 17 });
 // Kho dữ liệu D1: hộp hở cạnh phải, ô mã kho tách riêng
 const X0 = 690, X1 = 876, T = 14, B = 646;
@@ -46,10 +44,10 @@ g.text(803, 46, 'MinIO data-lake', { fs: 16, a: 'middle', bold: true });
 ['raw/', 'pic/', 'crop/', 'assets/', 'text/', 'preprocessed/', 'final/', 'errors/'].forEach((k, i) => g.text(708, 96 + i * 26, k, { fs: 15, mono: true }));
 // Luồng giữa tiến trình và kho: ghi (w) đi vào kho, đọc (r) đi ra từ kho; dy lệch khỏi tâm khi một tiến trình có cả đọc và ghi
 const st = [[p6, 'trạng thái, kết quả', 'r', 0], [pr[0], ['PDF gốc, ảnh trang,', 'bản ghi lỗi'], 'w', 0], [pr[1], 'ảnh trang', 'r', 0],
-  [pr[2], 'ảnh dòng, ảnh bảng/hình', 'w', -12], [pr[2], 'ảnh trang', 'r', 14], [pr[3], 'ảnh dòng', 'r', 0],
-  [pr[4], 'văn bản, Markdown, JSON', 'w', -12], [pr[4], 'văn bản từng trang', 'r', 16]];
+  [pr[2], 'ảnh dòng, ảnh bảng/hình', 'w', -14], [pr[2], 'ảnh trang', 'r', 16], [pr[3], 'ảnh dòng', 'r', 0],
+  [pr[4], 'văn bản, Markdown, JSON', 'w', -14], [pr[4], 'văn bản từng trang', 'r', 18]];
 st.forEach(([e, t, dir, dy]) => {
-  const y = e.cy + dy, x = rx(e, dy);
+  const y = e.cy + dy, x = e.r;
   if (dir === 'w') g.line([[x, y], [X0 - 2, y]]); else g.line([[X0, y], [x + 1, y]]);
   const lines = [].concat(t), below = dy > 0;
   g.text(602, below ? y + 17 : y - 9 - (lines.length - 1) * 16, lines, { fs: 14, a: 'middle', halo: true, lh: 16 });

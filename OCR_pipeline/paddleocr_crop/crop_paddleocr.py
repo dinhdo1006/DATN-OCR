@@ -101,7 +101,9 @@ def main():
     )
 
     logging.info("Loading PaddleOCR...")
-    ocr = PaddleOCR(lang='vi', rec=False, use_angle_cls=False, show_log=False)
+    # score_mode "slow": chấm điểm box theo đường viền dòng thay vì hình chữ nhật thẳng bao ngoài.
+    # Với bản quét hơi nghiêng, dòng dài ở chế độ "fast" bị nền trắng làm loãng điểm, rơi dưới ngưỡng 0,6 và mất dòng.
+    ocr = PaddleOCR(lang='vi', rec=False, use_angle_cls=False, show_log=False, det_db_score_mode="slow")
     logging.info("PaddleOCR loaded")
 
     broker = os.getenv('KAFKA_BROKER', 'kafka:9092')
@@ -210,6 +212,16 @@ def main():
                         "region_id": ridx,
                         "region_bbox": [x1, y1, x2, y2],
                     })
+
+            # Bỏ box quá thấp so với dòng chữ thường của trang (đốm nhiễu, khe giữa đường kẻ bảng):
+            # VietOCR nhận ảnh vụn như vậy sẽ sinh chữ không có thật
+            heights = sorted(_bbox(b["coordinates"])[3] - _bbox(b["coordinates"])[1] for b in text_boxes)
+            if len(heights) >= 5:
+                min_h = 0.5 * heights[len(heights) // 2]
+                before = len(text_boxes)
+                text_boxes = [b for b in text_boxes if _bbox(b["coordinates"])[3] - _bbox(b["coordinates"])[1] >= min_h]
+                if before > len(text_boxes):
+                    logging.info(f"{base_name}: bỏ {before - len(text_boxes)} box nhiễu (cao < {min_h:.0f}px)")
 
             removed = len(text_boxes)
             text_boxes = dedup_boxes(text_boxes)

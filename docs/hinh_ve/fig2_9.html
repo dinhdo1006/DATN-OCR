@@ -25,6 +25,6 @@ drawSeq({
     { f: "layout-worker", t: "Kafka", l: "commit offset", k: "sync" },
     { end: true }
   ],
-  acts: [["Preprocess", 4, 6]]
+  acts: [["NiFi", 0, 8], ["layout-worker", 9, 15]]
 });
 </script></body></html>

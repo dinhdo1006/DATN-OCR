@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><script src="dg.js"></script></head><body>
+<script>
+// Hướng phát triển: máy chủ điều phối chỉ phát việc và gom kết quả, mỗi máy worker chạy trọn chuỗi xử lý một trang
+const g = new Dg(1200, 540);
+const src = g.box(10, 180, 180, 100, ['Người dùng,', 'hệ thống nguồn'], { c: 'gray', fs: 21, title: false });
+const co = g.box(270, 50, 350, 350, [], { c: 'green' });
+g.text(445, 92, 'Máy chủ điều phối', { fs: 24, a: 'middle', bold: true });
+g.text(290, 146, ['NiFi: nhận tài liệu, tách trang', 'Kafka: hàng đợi trang', '   (số partition ≥ số máy)', 'MinIO: ảnh trang, kết quả', 'Gom trang → tài liệu'], { fs: 20, lh: 44 });
+g.line([[src.r, 230], [co.x - 2, 230]]);
+g.text(230, 218, 'tài liệu', { fs: 19, a: 'middle', halo: true });
+const W = [['Máy worker 1', 60], ['Máy worker 2', 170], ['Máy worker N', 300]];
+W.forEach(([n, y]) => {
+  g.box(770, y, 410, 90, [n, 'bố cục → cắt dòng → nhận dạng'], { c: 'blue', fs: 21, sub: 19 });
+  g.line([[co.r, y + 30], [768, y + 30]], { sw: 2 });
+  g.line([[770, y + 62], [co.r + 2, y + 62]], { sw: 2, dash: true });
+});
+g.text(975, 285, '⋮', { fs: 32, a: 'middle', bold: true, color: '#2f5d8a' });
+g.text(695, 40, 'trang cần xử lý →', { fs: 19, a: 'middle' });
+g.text(695, 428, '← kết quả từng trang', { fs: 19, a: 'middle' });
+g.box(10, 448, 1170, 84, ['Ví dụ: 10 máy × 5 giây/trang → 100 trang ≈ 50 giây (ước tính)', 'Thêm máy = thêm worker cùng nhóm consumer, Kafka tự chia việc; tự tăng/giảm số máy theo độ dài hàng đợi'], { c: 'yellow', fs: 20, title: false, lh: 30 });
+g.render();
+</script></body></html>

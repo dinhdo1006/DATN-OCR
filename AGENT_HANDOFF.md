@@ -292,6 +292,40 @@ Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối ch�
   - mục 3.5.1 thêm lỗi (xi);
   - UC01 bước 4, mục 3.4.1 và 3.4.5 ghi việc bỏ dấu / kiểm tra tên tệp;
   - Bảng 2-12 dòng POST /process thêm lỗi 422.
+- Lỗi mất dòng dài trên bản quét nghiêng (tài liệu TB 3 trang quét bằng iPhone):
+  - Sửa trong `paddleocr_crop/crop_paddleocr.py`: dùng `det_db_score_mode="slow"` và bỏ box cao < 0,5 × trung vị.
+  - Đo lại: A không đổi (4,95% / 88,21%); B 33,18% / 79,07%; A quét 8,88% / 83,53%; B quét 30,35% / 81,03%.
+  - Chi tiết trong `tools/results/kiem_thu_2026-10-26.md` và `do_lai_sau_sua_cat_dong_2026-10-26_*.json`.
+  - Người dùng chọn cập nhật số mới. Đã sửa Tóm tắt, mục 3.9, 3.10 (thêm đoạn đo lại 26/10), Bảng 3-9, nhận xét so với Tesseract ("0,5–6,4 điểm", A quét 8,88%, precision 87,42%), Kết luận; slide 20, 21, 24. Lỗi (xii) thêm vào mục 3.5.1 và 3.4.3; Kết luận ghi "mười hai lỗi nhỏ hơn".
+- Định dạng bảng theo file mẫu `Mau trinh bay DATN CNPM - 21 07 2025.docx`:
+  - Nội dung ô dùng TLTK cỡ 12, trước 6 / sau 5 pt, giãn dòng 1,3, căn giữa theo chiều dọc. Giữ căn lề và chữ đậm/nghiêng cũ của từng đoạn.
+  - Hàng tiêu đề đậm, căn giữa, bỏ tô nền xanh.
+  - Bảng 3-10 (đầu ra thô) dùng style Code.
+  - Báo cáo từ 88 lên 102 trang. Mẫu chỉ quy định tối thiểu 50 trang, không giới hạn tối đa.
+
+## 7b17. Theo nhận xét của GVHD về hình vẽ và hướng phát triển (26/10/2026)
+
+- **Hình 2-8:** mã không có lớp nào (7 dịch vụ là script Python; KafkaClient/S3Client trước đây là thư viện kafka-python/boto3, không phải interface tự viết). Đã thay biểu đồ lớp bằng **biểu đồ thành phần UML**:
+  - «component» cho từng dịch vụ;
+  - Kafka API / S3 API vẽ dạng ball, lặp ở từng hàng;
+  - POST /process, HTTP /api/*;
+  - topic nhận / phát lấy từ mã.
+  Mục 2.5.1 đổi tên "Biểu đồ thành phần của hệ thống"; Bảng 1-5 dòng "Lớp" → "Thành phần"; 5 chỗ liệt kê biểu đồ đổi "lớp" → "thành phần".
+- **Biểu đồ tuần tự 2-9, 2-10, 2-11** vẽ lại theo UML 2.5.1 (`seq.js`):
+  - thanh kích hoạt tự động cho bên nhận lời gọi đồng bộ;
+  - thanh lồng cho lời gọi tự thân;
+  - thanh của bên chủ động (spec.acts);
+  - đầu mũi tên to hơn, chữ 21 px, chú giải 3 loại thông điệp.
+  Bản nhận xét AI mà thầy chuyển có hai ý sai so với hình cũ: mũi tên trả về vốn đã đầu hở, POST vốn đã đầu đặc. Ý thanh kích hoạt thì đúng.
+- **DFD 2-1, 2-4:** trước đây trộn ký pháp (tiến trình elip của Yourdon–DeMarco, kho D1 kiểu Gane–Sarson). Nay thống nhất Gane–Sarson: tiến trình bo góc có dải số hiệu, tác nhân có bóng đổ.
+- **Mục 1.9.2:** thêm đoạn nêu chuẩn (UML 2.5.1 OMG, Gane–Sarson) và định nghĩa đồng bộ / bất đồng bộ / trả về / thanh kích hoạt.
+- **Mục 2.5.2:** thêm câu phân biệt hai mức. Giữa các worker là bất đồng bộ qua Kafka; bên trong mỗi bước, lời gọi MinIO, poll, commit là đồng bộ.
+- **Hạn chế:** "toàn bộ chạy trên một máy… hàng đợi dài không mở rộng được".
+- **Hướng phát triển:**
+  - mục đầu là triển khai phân tán máy điều phối – máy worker (10 máy × 5 s/trang → 100 trang ≈ 50 s, ước tính; Kafka nhiều broker, MinIO phân tán, KEDA);
+  - các gạch đầu dòng đồng bộ chỉ in đậm tiêu đề.
+- **Slide:** slide 12 DFD mới; slide 25 ô "Mở rộng nhiều máy"; **slide 26 mới** "Hướng phát triển: triển khai nhiều máy" (hình `fig_cum`). Tổng 27 slide.
+- Báo cáo 105 trang.
 - Bản trong thư mục người dùng được mở và lưu bằng Word lúc 11:23 thì bị hỏng đánh số Heading 1 ("CHƯƠNG 1. LỜI CẢM ƠN"…, chương thật thành 7–9). Nội dung văn bản không khác gì ngoài lỗi này. Bản đó được giữ ở `_luu_tru/BaoCao_ban_mo_Word_26-10_11h23.docx` rồi ghi đè bằng bản sửa.
 
 ## 7c. Lưu ý vận hành
