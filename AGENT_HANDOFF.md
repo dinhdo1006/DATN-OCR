@@ -286,6 +286,12 @@ Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối ch�
   - Nộp báo cáo 09/11; phản biện 10–15/11; lập hội đồng 16–22/11; bảo vệ dự kiến 23–29/11/2026.
   - Đã sửa câu ở Mở đầu, đoạn dẫn và Bảng 1-4 (14 tuần; nội dung tuần 8–10 khớp ngày thật trong nhật ký). Slide không có lịch.
   - GVHD vẫn là ThS. Ngô Hùng Long; các cô có tên trong bảng kế hoạch là cán bộ Bộ môn, không phải GVHD.
+- Lời cảm ơn ghi ngày 09/11/2026; gáy ghi "CNPM K67 05A – ĐỢT KỲ 1A".
+- 26/10 chiều: người dùng chuyển hệ thống sang **GPU** (image layout-worker-gpu, vietocr-worker-gpu đã có sẵn, không build lại). Quay về CPU: `docker compose up -d --no-deps layout_detector vietocr`.
+- Lỗi tên tệp có dấu tiếng Việt: preprocess sập 500 khi đặt header `X-Document-Id`. Đã sửa web_ui (bỏ dấu tên tệp) và preprocess (tên không phải ASCII trả 422), đã build lại hai container và kiểm tra lại. Chi tiết trong `tools/results/kiem_thu_2026-10-26.md`. Báo cáo đã cập nhật:
+  - mục 3.5.1 thêm lỗi (xi);
+  - UC01 bước 4, mục 3.4.1 và 3.4.5 ghi việc bỏ dấu / kiểm tra tên tệp;
+  - Bảng 2-12 dòng POST /process thêm lỗi 422.
 - Bản trong thư mục người dùng được mở và lưu bằng Word lúc 11:23 thì bị hỏng đánh số Heading 1 ("CHƯƠNG 1. LỜI CẢM ƠN"…, chương thật thành 7–9). Nội dung văn bản không khác gì ngoài lỗi này. Bản đó được giữ ở `_luu_tru/BaoCao_ban_mo_Word_26-10_11h23.docx` rồi ghi đè bằng bản sửa.
 
 ## 7c. Lưu ý vận hành

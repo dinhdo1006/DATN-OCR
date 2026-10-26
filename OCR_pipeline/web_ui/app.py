@@ -3,6 +3,7 @@ import re
 import json
 import time
 import logging
+import unicodedata
 
 import boto3
 from botocore.exceptions import ClientError
@@ -125,7 +126,10 @@ async def upload(file: UploadFile = File(...)):
     if not data.startswith(b"%PDF"):
         raise HTTPException(400, "File không phải PDF hợp lệ")
 
-    stem = re.sub(r"[^\w.-]+", "_", os.path.splitext(os.path.basename(file.filename))[0]).strip("._") or "document"
+    # Bỏ dấu tiếng Việt: mã tài liệu đi qua HTTP header X-Document-Id (chỉ nhận latin-1)
+    name = os.path.splitext(os.path.basename(file.filename))[0].replace("đ", "d").replace("Đ", "D")
+    name = "".join(c for c in unicodedata.normalize("NFKD", name) if not unicodedata.combining(c))
+    stem = re.sub(r"[^A-Za-z0-9_.-]+", "_", name).strip("._") or "document"
     # Tên đã tồn tại -> thêm hậu tố thời gian (NiFi ListS3 chỉ nhặt object mới, và tránh trộn kết quả)
     if exists(f"raw/{stem}.pdf") or list_keys(f"final/{stem}/"):
         stem = f"{stem}_{time.strftime('%Y%m%d_%H%M%S')}"

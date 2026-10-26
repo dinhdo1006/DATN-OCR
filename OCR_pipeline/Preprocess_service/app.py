@@ -22,6 +22,9 @@ async def process(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only PDF allowed")
 
     safe_name = Path(file.filename).name
+    if not safe_name.isascii():
+        # Mã tài liệu trả về trong header X-Document-Id, header HTTP không chứa được ký tự có dấu
+        raise HTTPException(status_code=422, detail="Tên tệp phải không dấu (chỉ chữ cái, chữ số, _ . -)")
     unique_name = f"{uuid.uuid4()}_{safe_name}"
     pdf_path = os.path.join(UPLOAD_DIR, unique_name)
 
