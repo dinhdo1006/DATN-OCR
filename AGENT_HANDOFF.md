@@ -326,6 +326,25 @@ Chi tiết số liệu: `tools/results/kiem_thu_2026-10-22.md`, JSON đối ch�
   - các gạch đầu dòng đồng bộ chỉ in đậm tiêu đề.
 - **Slide:** slide 12 DFD mới; slide 25 ô "Mở rộng nhiều máy"; **slide 26 mới** "Hướng phát triển: triển khai nhiều máy" (hình `fig_cum`). Tổng 27 slide.
 - Báo cáo 105 trang.
+
+## 7b18. Tổng duyệt demo và cập nhật tài liệu đi kèm (27/10/2026)
+
+- Tổng duyệt trên chế độ GPU, đủ 10 container, 11 processor NiFi:
+  - tệp demo 2 trang xong sau 46 s (CPU ngày 24/10: 58 s), khoảng 13 s đầu là NiFi quét raw/;
+  - pdf_hong báo lỗi 422 sau khoảng 5 s;
+  - kafka_hang_doi.ps1 và kafka_su_kien.ps1 chạy đúng;
+  - kết quả Markdown trùng từng chữ với bản dự phòng chạy CPU ngày 24/10.
+- Thư mục Demo:
+  - `demo_decuong_2trang.pdf` đổi tên thành `demo_2trang_co_bang.pdf`;
+  - bản dự phòng đổi thành `duphong_demo_2trang_co_bang.md`;
+  - HuongDan_Demo.txt viết lại cho chế độ GPU. Lưu ý trong đó: `docker compose up -d` không kèm tệp gpu sẽ đưa hai worker về CPU. Thêm câu hỏi về đồng bộ / bất đồng bộ, biểu đồ thành phần, mở rộng nhiều máy, hai lỗi mới.
+- Slide:
+  - **slide 17 mới** "Lỗi phát hiện khi thử tài liệu thật" (lỗi 5 tên tệp có dấu, lỗi 6 mất dòng trên bản quét nghiêng);
+  - slide hướng phát triển nhiều máy nay là slide 27;
+  - tổng 28 slide.
+- Tài liệu hỏi đáp (Claude Docs, rev 77):
+  - sửa "0,6–8 điểm" → "0,5–6,4 điểm" và số liệu bản B / bản quét;
+  - thêm phần "Cập nhật theo nhận xét của GVHD (27/10/2026)" gồm bảng số cũ / mới và 6 câu hỏi.
 - Bản trong thư mục người dùng được mở và lưu bằng Word lúc 11:23 thì bị hỏng đánh số Heading 1 ("CHƯƠNG 1. LỜI CẢM ƠN"…, chương thật thành 7–9). Nội dung văn bản không khác gì ngoài lỗi này. Bản đó được giữ ở `_luu_tru/BaoCao_ban_mo_Word_26-10_11h23.docx` rồi ghi đè bằng bản sửa.
 
 ## 7c. Lưu ý vận hành
